@@ -55,8 +55,8 @@ export class Alumnus {
   @Column()
   graduationYear!: number;
 
-  @Column()
-  class!: string;
+  @Column({ nullable: true })
+  class?: string;
 
   @Column()
   schoolSector!: string;

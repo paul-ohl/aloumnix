@@ -1,0 +1,5 @@
+fullName,mail,graduationYear,class,schoolSector,professionalStatus,linkedInProfile
+Alice Johnson,alice@example.com,2022,,Computer Science,Frontend Developer,https://linkedin.com/in/alicej
+Bob Smith,bob.smith@university.edu,2021,Class B,Mathematics,,https://linkedin.com/in/bobsmith
+Charlie Brown,charlie@gmail.com,2023,Class C,Arts,Illustrator,
+Other student, mail@example.com, 2026,,Dev,

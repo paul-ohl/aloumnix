@@ -64,3 +64,10 @@ export const createAlumnus = async (data: Partial<Alumnus>) => {
   const alumnus = repository.create(data);
   return await repository.save(alumnus);
 };
+
+export const createAlumni = async (data: Partial<Alumnus>[]) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(Alumnus);
+  const alumni = repository.create(data);
+  return await repository.save(alumni);
+};

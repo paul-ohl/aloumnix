@@ -1,0 +1,4 @@
+fullName,mail,graduationYear,class,schoolSector,professionalStatus,linkedInProfile
+J,invalid-email,1850,,Computer Science,Software Engineer,not-a-url
+" ",john@example.com,2025,Class A,Math,Teacher,https://linkedin.com/in/john
+Valid Student,valid@example.com,2024,Class B,Physics,,
