@@ -25,6 +25,7 @@ This document provides essential information for autonomous agents working on th
 | **Watch Tests** | `pnpm test:watch` |
 | **Start Database** | `docker compose up -d` |
 | **Stop Database** | `docker compose down` |
+| **Seed Database** | Automatic in development mode |
 
 ### Testing Guidelines
 - **Framework:** [Vitest](https://vitest.dev/) with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).

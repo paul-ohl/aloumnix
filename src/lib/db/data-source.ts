@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { User } from "./entities/User";
+import { Alumnus, Event, JobOffering, School, User } from "./entities";
+
+import { seedDatabase } from "./seed";
 
 const AppDataSource = new DataSource({
   type: "postgres",
@@ -11,7 +13,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "aloumnix",
   synchronize: process.env.NODE_ENV === "development",
   logging: process.env.NODE_ENV === "development",
-  entities: [User],
+  entities: [User, School, Alumnus, Event, JobOffering],
   migrations: [],
   subscribers: [],
 });
@@ -28,6 +30,13 @@ export const getDataSource = async () => {
     dataSourcePromise = null;
   }
 
-  dataSourcePromise = AppDataSource.initialize();
+  dataSourcePromise = (async () => {
+    const ds = await AppDataSource.initialize();
+    if (process.env.NODE_ENV === "development") {
+      await seedDatabase(ds);
+    }
+    return ds;
+  })();
+
   return dataSourcePromise;
 };
