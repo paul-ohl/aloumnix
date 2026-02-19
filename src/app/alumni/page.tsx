@@ -153,9 +153,8 @@ export default function AlumniPage() {
               </div>
               {!action.disabled && (
                 <div className="mt-6 flex items-center text-sm font-bold text-zinc-900 dark:text-zinc-50 group-hover:translate-x-1 transition-transform">
-                  Get Started
                   <svg
-                    className="ml-2 w-4 h-4"
+                    className="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
