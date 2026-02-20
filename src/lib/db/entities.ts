@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from "typeorm";
 
@@ -51,6 +52,7 @@ export class School {
 }
 
 @Entity("alumni")
+@Unique(["mail", "school"])
 export class Alumnus {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
@@ -67,7 +69,7 @@ export class Alumnus {
   @Column()
   schoolSector!: string;
 
-  @Column({ unique: true })
+  @Column()
   mail!: string;
 
   @Column({ nullable: true })
