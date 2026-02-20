@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { loginSchoolAction } from "@/app/actions/auth";
 import { SchoolSelect } from "./SchoolSelect";
 
@@ -17,6 +17,16 @@ export function SchoolLoginForm({ schools }: SchoolLoginFormProps) {
     error: null,
   });
 
+  const [selectedSchoolId, setSelectedSchoolId] = useState(
+    state?.schoolId || "",
+  );
+
+  useEffect(() => {
+    if (state?.schoolId) {
+      setSelectedSchoolId(state.schoolId);
+    }
+  }, [state?.schoolId]);
+
   return (
     <form action={formAction} className="mt-8 space-y-6">
       {state?.error && (
@@ -25,7 +35,11 @@ export function SchoolLoginForm({ schools }: SchoolLoginFormProps) {
         </div>
       )}
 
-      <SchoolSelect schools={schools} />
+      <SchoolSelect
+        schools={schools}
+        selectedId={selectedSchoolId}
+        onChange={setSelectedSchoolId}
+      />
 
       <div className="space-y-2">
         <label
@@ -39,6 +53,7 @@ export function SchoolLoginForm({ schools }: SchoolLoginFormProps) {
           name="password"
           type="password"
           autoComplete="current-password"
+          defaultValue={state?.password}
           placeholder="••••••••"
           className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-500"
         />

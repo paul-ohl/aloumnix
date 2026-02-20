@@ -10,6 +10,9 @@ import { Alumnus, School } from "@/lib/db/entities";
  */
 export type AuthState = {
   error: string | null;
+  email?: string;
+  schoolId?: string;
+  password?: string;
 };
 
 /**
@@ -23,7 +26,7 @@ export async function loginSchoolAction(
   const password = formData.get("password") as string;
 
   if (!schoolId) {
-    return { error: "Please select a school." };
+    return { error: "Please select a school.", password };
   }
 
   try {
@@ -32,25 +35,27 @@ export async function loginSchoolAction(
     const school = await repository.findOne({ where: { id: schoolId } });
 
     if (!school) {
-      return { error: "School not found." };
+      return { error: "School not found.", schoolId, password };
     }
 
     if (school.isPasswordSet && school.password) {
       if (!password) {
-        return { error: "Please enter your password." };
+        return { error: "Please enter your password.", schoolId };
       }
       const isValid = await AuthService.verifyPassword(
         password,
         school.password,
       );
       if (!isValid) {
-        return { error: "Invalid password." };
+        return { error: "Invalid password.", schoolId, password };
       }
     } else {
       // First login
       if (password) {
         return {
           error: "First login must be without password. Please leave it empty.",
+          schoolId,
+          password,
         };
       }
     }
@@ -67,7 +72,11 @@ export async function loginSchoolAction(
       throw error;
     }
     console.error("Login error:", error);
-    return { error: "An unexpected error occurred. Please try again." };
+    return {
+      error: "An unexpected error occurred. Please try again.",
+      schoolId,
+      password,
+    };
   }
 }
 
@@ -82,7 +91,7 @@ export async function loginAlumniAction(
   const password = formData.get("password") as string;
 
   if (!email) {
-    return { error: "Please enter your email." };
+    return { error: "Please enter your email.", password };
   }
 
   try {
@@ -91,25 +100,27 @@ export async function loginAlumniAction(
     const alumnus = await repository.findOne({ where: { mail: email } });
 
     if (!alumnus) {
-      return { error: "Invalid email or password." };
+      return { error: "Invalid email or password.", email, password };
     }
 
     if (alumnus.isPasswordSet && alumnus.password) {
       if (!password) {
-        return { error: "Please enter your password." };
+        return { error: "Please enter your password.", email };
       }
       const isValid = await AuthService.verifyPassword(
         password,
         alumnus.password,
       );
       if (!isValid) {
-        return { error: "Invalid email or password." };
+        return { error: "Invalid email or password.", email, password };
       }
     } else {
       // First login
       if (password) {
         return {
           error: "First login must be without password. Please leave it empty.",
+          email,
+          password,
         };
       }
     }
@@ -126,7 +137,11 @@ export async function loginAlumniAction(
       throw error;
     }
     console.error("Login error:", error);
-    return { error: "An unexpected error occurred. Please try again." };
+    return {
+      error: "An unexpected error occurred. Please try again.",
+      email,
+      password,
+    };
   }
 }
 

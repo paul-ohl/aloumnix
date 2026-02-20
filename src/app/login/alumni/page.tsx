@@ -40,6 +40,7 @@ export default function AlumniLoginPage() {
               type="email"
               autoComplete="email"
               required
+              defaultValue={state?.email}
               placeholder="you@example.com"
               className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-500"
             />
@@ -57,6 +58,7 @@ export default function AlumniLoginPage() {
               name="password"
               type="password"
               autoComplete="current-password"
+              defaultValue={state?.password}
               placeholder="••••••••"
               className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm placeholder-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-500"
             />
