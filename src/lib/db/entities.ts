@@ -37,6 +37,12 @@ export class School {
   )
   jobOfferings!: JobOffering[];
 
+  @Column({ nullable: true })
+  password?: string;
+
+  @Column({ default: false })
+  isPasswordSet!: boolean;
+
   @CreateDateColumn()
   createdAt!: Date;
 
@@ -61,7 +67,7 @@ export class Alumnus {
   @Column()
   schoolSector!: string;
 
-  @Column()
+  @Column({ unique: true })
   mail!: string;
 
   @Column({ nullable: true })
@@ -75,6 +81,12 @@ export class Alumnus {
     (school) => school.alumni,
   )
   school!: School;
+
+  @Column({ nullable: true })
+  password?: string;
+
+  @Column({ default: false })
+  isPasswordSet!: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;
@@ -132,24 +144,6 @@ export class JobOffering {
     (school) => school.jobOfferings,
   )
   school!: School;
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
-}
-
-@Entity("users")
-export class User {
-  @PrimaryGeneratedColumn("uuid")
-  id!: string;
-
-  @Column({ unique: true })
-  email!: string;
-
-  @Column({ nullable: true })
-  name?: string;
 
   @CreateDateColumn()
   createdAt!: Date;
