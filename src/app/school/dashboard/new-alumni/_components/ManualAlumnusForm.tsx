@@ -5,11 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { createAlumnusAction } from "@/app/actions/alumni";
 import type { AlumnusInput } from "@/lib/validation/alumni";
 
-interface Props {
-  schoolId: string;
-}
-
-export function ManualAlumnusForm({ schoolId }: Props) {
+export function ManualAlumnusForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +39,6 @@ export function ManualAlumnusForm({ schoolId }: Props) {
       linkedInProfile: (formData.get("linkedInProfile") as string) || undefined,
       professionalStatus:
         (formData.get("professionalStatus") as string) || undefined,
-      schoolId: schoolId,
     };
 
     startTransition(async () => {
@@ -236,10 +231,10 @@ export function ManualAlumnusForm({ schoolId }: Props) {
               Student added successfully!
             </div>
             <Link
-              href="/alumni"
+              href="/school/dashboard"
               className="text-green-800 hover:underline font-bold"
             >
-              View Alumni List →
+              View Dashboard →
             </Link>
           </div>
         )}

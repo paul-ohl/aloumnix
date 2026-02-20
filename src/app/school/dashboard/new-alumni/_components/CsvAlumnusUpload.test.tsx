@@ -30,8 +30,6 @@ vi.mock("papaparse", () => ({
 }));
 
 describe("CsvAlumnusUpload", () => {
-  const mockSchoolId = "123e4567-e89b-12d3-a456-426614174000";
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -46,7 +44,7 @@ describe("CsvAlumnusUpload", () => {
   };
 
   it("renders upload area and template download button", () => {
-    render(<CsvAlumnusUpload schoolId={mockSchoolId} />);
+    render(<CsvAlumnusUpload />);
 
     expect(screen.getByText(/Bulk CSV Upload/i)).toBeInTheDocument();
     expect(screen.getByText(/Download Template/i)).toBeInTheDocument();
@@ -54,7 +52,7 @@ describe("CsvAlumnusUpload", () => {
   });
 
   it("handles file upload and shows ready state", async () => {
-    render(<CsvAlumnusUpload schoolId={mockSchoolId} />);
+    render(<CsvAlumnusUpload />);
 
     const file = new File(["dummy content"], "test.csv", { type: "text/csv" });
     const input = getFileInput();
@@ -72,7 +70,7 @@ describe("CsvAlumnusUpload", () => {
       .mocked(actions.bulkCreateAlumniAction)
       .mockResolvedValue({ success: true, count: 1 });
 
-    render(<CsvAlumnusUpload schoolId={mockSchoolId} />);
+    render(<CsvAlumnusUpload />);
 
     const file = new File(["dummy content"], "test.csv", { type: "text/csv" });
     const input = getFileInput();
@@ -87,7 +85,6 @@ describe("CsvAlumnusUpload", () => {
           expect.objectContaining({
             fullName: "John Doe",
             graduationYear: 2023,
-            schoolId: mockSchoolId,
           }),
         ]),
       );
@@ -116,7 +113,7 @@ describe("CsvAlumnusUpload", () => {
       });
     });
 
-    render(<CsvAlumnusUpload schoolId={mockSchoolId} />);
+    render(<CsvAlumnusUpload />);
 
     const file = new File(["dummy content"], "test.csv", { type: "text/csv" });
     const input = getFileInput();
@@ -158,7 +155,7 @@ describe("CsvAlumnusUpload", () => {
       });
     });
 
-    render(<CsvAlumnusUpload schoolId={mockSchoolId} />);
+    render(<CsvAlumnusUpload />);
 
     const file = new File(["dummy content"], "test.csv", { type: "text/csv" });
     const input = getFileInput();

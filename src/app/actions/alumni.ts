@@ -1,12 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { AuthService } from "@/lib/auth/service";
 import type { Alumnus } from "@/lib/db/entities";
 import { createAlumni, createAlumnus } from "@/lib/services/AlumnusService";
 import type { AlumnusInput } from "@/lib/validation/alumni";
 import { alumnusSchema } from "@/lib/validation/alumni";
 
 export async function createAlumnusAction(data: AlumnusInput) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
   const validated = alumnusSchema.safeParse(data);
   if (!validated.success) {
     return {
@@ -16,12 +22,12 @@ export async function createAlumnusAction(data: AlumnusInput) {
   }
 
   try {
-    const { schoolId, ...rest } = validated.data;
+    const { schoolId: _unused, ...rest } = validated.data;
     await createAlumnus({
       ...rest,
-      school: { id: schoolId } as Alumnus["school"],
+      school: { id: session.userId } as Alumnus["school"],
     });
-    revalidatePath("/alumni");
+    revalidatePath("/school/dashboard");
     return { success: true };
   } catch (err) {
     console.error("Error creating alumnus:", err);
@@ -30,6 +36,11 @@ export async function createAlumnusAction(data: AlumnusInput) {
 }
 
 export async function bulkCreateAlumniAction(data: AlumnusInput[]) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
   const errors: { index: number; errors: Record<string, string[]> }[] = [];
   const validatedData: Partial<Alumnus>[] = [];
 
@@ -41,10 +52,10 @@ export async function bulkCreateAlumniAction(data: AlumnusInput[]) {
         errors: res.error.flatten().fieldErrors,
       });
     } else {
-      const { schoolId, ...rest } = res.data;
+      const { schoolId: _unused, ...rest } = res.data;
       validatedData.push({
         ...rest,
-        school: { id: schoolId } as Alumnus["school"],
+        school: { id: session.userId } as Alumnus["school"],
       });
     }
   });
@@ -55,7 +66,7 @@ export async function bulkCreateAlumniAction(data: AlumnusInput[]) {
 
   try {
     await createAlumni(validatedData);
-    revalidatePath("/alumni");
+    revalidatePath("/school/dashboard");
     return { success: true, count: validatedData.length };
   } catch (err) {
     console.error("Error bulk creating alumni:", err);

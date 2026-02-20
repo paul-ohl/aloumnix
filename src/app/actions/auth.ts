@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AuthService } from "@/lib/auth/service";
 import { getDataSource } from "@/lib/db/data-source";
 import { Alumnus, School } from "@/lib/db/entities";
+import { validatePassword } from "@/lib/validation/auth";
 
 /**
  * State for Authentication Actions
@@ -12,21 +13,22 @@ export type AuthState = {
   error: string | null;
   email?: string;
   schoolId?: string;
-  password?: string;
+  success?: boolean;
 };
 
 /**
  * Action for School Login
  */
 export async function loginSchoolAction(
-  prevState: AuthState | undefined,
+  _prevState: AuthState | undefined,
   formData: FormData,
 ): Promise<AuthState | undefined> {
   const schoolId = formData.get("schoolId") as string;
   const password = formData.get("password") as string;
+  let redirectPath: string | null = null;
 
   if (!schoolId) {
-    return { error: "Please select a school.", password };
+    return { error: "Please select a school." };
   }
 
   try {
@@ -35,7 +37,7 @@ export async function loginSchoolAction(
     const school = await repository.findOne({ where: { id: schoolId } });
 
     if (!school) {
-      return { error: "School not found.", schoolId, password };
+      return { error: "School not found.", schoolId };
     }
 
     if (school.isPasswordSet && school.password) {
@@ -47,7 +49,7 @@ export async function loginSchoolAction(
         school.password,
       );
       if (!isValid) {
-        return { error: "Invalid password.", schoolId, password };
+        return { error: "Invalid password.", schoolId };
       }
     } else {
       // First login
@@ -55,28 +57,24 @@ export async function loginSchoolAction(
         return {
           error: "First login must be without password. Please leave it empty.",
           schoolId,
-          password,
         };
       }
     }
 
     const session = await AuthService.createSession(school, "school");
-
-    if (session.needsPasswordSet) {
-      redirect("/set-password");
-    }
-
-    redirect("/school/dashboard");
+    redirectPath = session.needsPasswordSet
+      ? "/set-password"
+      : "/school/dashboard";
   } catch (error) {
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
-      throw error;
-    }
     console.error("Login error:", error);
     return {
       error: "An unexpected error occurred. Please try again.",
       schoolId,
-      password,
     };
+  }
+
+  if (redirectPath) {
+    redirect(redirectPath);
   }
 }
 
@@ -84,14 +82,15 @@ export async function loginSchoolAction(
  * Action for Alumni Login
  */
 export async function loginAlumniAction(
-  prevState: AuthState | undefined,
+  _prevState: AuthState | undefined,
   formData: FormData,
 ): Promise<AuthState | undefined> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  let redirectPath: string | null = null;
 
   if (!email) {
-    return { error: "Please enter your email.", password };
+    return { error: "Please enter your email." };
   }
 
   try {
@@ -100,7 +99,7 @@ export async function loginAlumniAction(
     const alumnus = await repository.findOne({ where: { mail: email } });
 
     if (!alumnus) {
-      return { error: "Invalid email or password.", email, password };
+      return { error: "Invalid email or password.", email };
     }
 
     if (alumnus.isPasswordSet && alumnus.password) {
@@ -112,7 +111,7 @@ export async function loginAlumniAction(
         alumnus.password,
       );
       if (!isValid) {
-        return { error: "Invalid email or password.", email, password };
+        return { error: "Invalid email or password.", email };
       }
     } else {
       // First login
@@ -120,74 +119,88 @@ export async function loginAlumniAction(
         return {
           error: "First login must be without password. Please leave it empty.",
           email,
-          password,
         };
       }
     }
 
     const session = await AuthService.createSession(alumnus, "alumnus");
-
-    if (session.needsPasswordSet) {
-      redirect("/set-password");
-    }
-
-    redirect("/alumni/dashboard");
+    redirectPath = session.needsPasswordSet
+      ? "/set-password"
+      : "/alumni/dashboard";
   } catch (error) {
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
-      throw error;
-    }
     console.error("Login error:", error);
     return {
       error: "An unexpected error occurred. Please try again.",
       email,
-      password,
     };
+  }
+
+  if (redirectPath) {
+    redirect(redirectPath);
   }
 }
 
 /**
  * Action for Setting Password (First Login)
  */
-export async function setPasswordAction(formData: FormData): Promise<void> {
+export async function setPasswordAction(
+  _prevState: AuthState | undefined,
+  formData: FormData,
+): Promise<AuthState | undefined> {
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
+  let redirectPath: string | null = null;
 
-  if (!password || password.length < 8) {
-    return;
+  const validationError = validatePassword(password);
+  if (validationError) {
+    return { error: validationError };
   }
 
   if (password !== confirmPassword) {
-    return;
+    return { error: "Passwords do not match." };
   }
 
-  const session = await AuthService.getSession();
-  if (!session) {
-    redirect("/login/alumni");
+  try {
+    const session = await AuthService.getSession();
+    if (!session) {
+      redirectPath = "/login/alumni";
+    } else {
+      const dataSource = await getDataSource();
+      const hashedPassword = await AuthService.hashPassword(password);
+
+      if (session.role === "school") {
+        const repository = dataSource.getRepository(School);
+        await repository.update(session.userId, {
+          password: hashedPassword,
+          isPasswordSet: true,
+        });
+        // Refresh session
+        const school = await repository.findOne({
+          where: { id: session.userId },
+        });
+        if (school) await AuthService.createSession(school, "school");
+        redirectPath = "/school/dashboard";
+      } else {
+        const repository = dataSource.getRepository(Alumnus);
+        await repository.update(session.userId, {
+          password: hashedPassword,
+          isPasswordSet: true,
+        });
+        // Refresh session
+        const alumnus = await repository.findOne({
+          where: { id: session.userId },
+        });
+        if (alumnus) await AuthService.createSession(alumnus, "alumnus");
+        redirectPath = "/alumni/dashboard";
+      }
+    }
+  } catch (error) {
+    console.error("Set password error:", error);
+    return { error: "Failed to set password. Please try again." };
   }
 
-  const dataSource = await getDataSource();
-  const hashedPassword = await AuthService.hashPassword(password);
-
-  if (session.role === "school") {
-    const repository = dataSource.getRepository(School);
-    await repository.update(session.userId, {
-      password: hashedPassword,
-      isPasswordSet: true,
-    });
-    // Refresh session
-    const school = await repository.findOne({ where: { id: session.userId } });
-    if (school) await AuthService.createSession(school, "school");
-    redirect("/school/dashboard");
-  } else {
-    const repository = dataSource.getRepository(Alumnus);
-    await repository.update(session.userId, {
-      password: hashedPassword,
-      isPasswordSet: true,
-    });
-    // Refresh session
-    const alumnus = await repository.findOne({ where: { id: session.userId } });
-    if (alumnus) await AuthService.createSession(alumnus, "alumnus");
-    redirect("/alumni/dashboard");
+  if (redirectPath) {
+    redirect(redirectPath);
   }
 }
 

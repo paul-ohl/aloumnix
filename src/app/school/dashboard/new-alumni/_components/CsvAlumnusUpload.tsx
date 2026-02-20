@@ -8,11 +8,7 @@ import type { AlumnusInput } from "@/lib/validation/alumni";
 
 const REQUIRED_HEADERS = ["fullName", "mail", "graduationYear", "schoolSector"];
 
-interface Props {
-  schoolId: string;
-}
-
-export function CsvAlumnusUpload({ schoolId }: Props) {
+export function CsvAlumnusUpload() {
   const [isPending, startTransition] = useTransition();
   const [data, setData] = useState<Record<string, string>[]>([]);
   const [headerError, setHeaderError] = useState<string | null>(null);
@@ -70,7 +66,6 @@ export function CsvAlumnusUpload({ schoolId }: Props) {
         mail: row.mail?.trim() || "",
         linkedInProfile: row.linkedInProfile?.trim() || undefined,
         professionalStatus: row.professionalStatus?.trim() || undefined,
-        schoolId: schoolId,
       };
     });
 
@@ -232,10 +227,10 @@ export function CsvAlumnusUpload({ schoolId }: Props) {
               </span>
             </div>
             <Link
-              href="/alumni"
+              href="/school/dashboard"
               className="text-green-900 hover:underline font-bold"
             >
-              View Alumni List →
+              View Dashboard →
             </Link>
           </div>
         )}

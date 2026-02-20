@@ -9,7 +9,6 @@ vi.mock("../db/entities", () => ({
   School: class {},
   Event: class {},
   JobOffering: class {},
-  User: class {},
 }));
 
 vi.mock("../db/data-source", () => ({

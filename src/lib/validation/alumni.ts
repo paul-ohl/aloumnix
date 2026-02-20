@@ -19,7 +19,7 @@ export const alumnusSchema = z.object({
     .optional()
     .or(z.literal("")),
   professionalStatus: z.string().optional(),
-  schoolId: z.string().uuid("Invalid school ID"),
+  schoolId: z.string().uuid("Invalid school ID").optional(),
 });
 
 export type AlumnusInput = z.infer<typeof alumnusSchema>;

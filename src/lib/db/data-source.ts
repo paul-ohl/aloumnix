@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { Alumnus, Event, JobOffering, School, User } from "./entities";
+import { Alumnus, Event, JobOffering, School } from "./entities";
 
 import { seedDatabase } from "./seed";
 
@@ -13,7 +13,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "aloumnix",
   synchronize: process.env.NODE_ENV === "development",
   logging: process.env.NODE_ENV === "development",
-  entities: [User, School, Alumnus, Event, JobOffering],
+  entities: [School, Alumnus, Event, JobOffering],
   migrations: [],
   subscribers: [],
 });

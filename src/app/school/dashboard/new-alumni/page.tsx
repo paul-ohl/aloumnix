@@ -1,30 +1,28 @@
 import Link from "next/link";
-import { getSchools } from "@/lib/services/SchoolService";
+import { redirect } from "next/navigation";
+import { AuthService } from "@/lib/auth/service";
 import { NewAlumnusClient } from "./_components/NewAlumnusClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewAlumnusPage() {
-  let schools: { id: string; name: string }[] = [];
+  const session = await AuthService.getSession();
 
-  try {
-    const result = await getSchools({ limit: 100 });
-    // Map to plain objects for safe serialization
-    schools = result.items.map((s) => ({
-      id: s.id,
-      name: s.name,
-    }));
-  } catch (error) {
-    console.error("Failed to fetch schools:", error);
-    // Continue with empty schools, the client component handles it
+  if (!session || session.role !== "school") {
+    redirect("/login/school");
   }
+
+  const school = {
+    id: session.userId,
+    name: session.email, // In session, 'email' for school is its 'name'
+  };
 
   return (
     <main className="min-h-screen bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <header>
           <Link
-            href="/alumni"
+            href="/school/dashboard"
             className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors mb-6 group"
           >
             <svg
@@ -41,17 +39,17 @@ export default async function NewAlumnusPage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Back to Alumni List
+            Back to Dashboard
           </Link>
           <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight mb-2">
             Add New Students
           </h1>
           <p className="text-zinc-600 text-lg">
-            Choose your preferred method to add students to the database.
+            Add students to {school.name}.
           </p>
         </header>
 
-        <NewAlumnusClient schools={schools} />
+        <NewAlumnusClient />
       </div>
     </main>
   );
