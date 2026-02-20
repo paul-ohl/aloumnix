@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { loginAlumniAction } from "@/app/actions/auth";
 
@@ -75,6 +76,15 @@ export default function AlumniLoginPage() {
             {isPending ? "Signing in..." : "Sign in"}
           </button>
         </form>
+
+        <div className="mt-6 text-center border-t border-zinc-100 pt-6 dark:border-zinc-800">
+          <Link
+            href="/login/school"
+            className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Switch to School Login →
+          </Link>
+        </div>
       </div>
     </div>
   );
