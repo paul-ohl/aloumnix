@@ -3,14 +3,24 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createAlumnusAction } from "@/app/actions/alumni";
+import { SchoolSelect } from "@/components/auth/SchoolSelect";
 import type { AlumnusInput } from "@/lib/validation/alumni";
 
-export function ManualAlumnusForm() {
+interface ManualAlumnusFormProps {
+  schools: { id: string; name: string; location: string }[];
+  defaultSchoolId: string;
+}
+
+export function ManualAlumnusForm({
+  schools,
+  defaultSchoolId,
+}: ManualAlumnusFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [success, setSuccess] = useState(false);
+  const [selectedSchoolId, setSelectedSchoolId] = useState(defaultSchoolId);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -39,6 +49,7 @@ export function ManualAlumnusForm() {
       linkedInProfile: (formData.get("linkedInProfile") as string) || undefined,
       professionalStatus:
         (formData.get("professionalStatus") as string) || undefined,
+      schoolId: formData.get("schoolId") as string,
     };
 
     startTransition(async () => {
@@ -52,6 +63,7 @@ export function ManualAlumnusForm() {
       } else {
         setSuccess(true);
         formRef.current?.reset();
+        setSelectedSchoolId(defaultSchoolId);
       }
     });
   }
@@ -79,6 +91,16 @@ export function ManualAlumnusForm() {
         data-testid="manual-form-element"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* School Selection */}
+          <div className="md:col-span-2">
+            <SchoolSelect
+              schools={schools}
+              selectedId={selectedSchoolId}
+              onChange={setSelectedSchoolId}
+              error={fieldErrors.schoolId?.[0]}
+            />
+          </div>
+
           {/* Full Name */}
           <div className="space-y-1">
             <label htmlFor="fullName" className={labelClasses}>

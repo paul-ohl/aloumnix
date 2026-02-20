@@ -7,14 +7,22 @@ vi.mock("@/app/actions/alumni", () => ({
   createAlumnusAction: vi.fn(),
 }));
 
+const mockSchools = [
+  { id: "school-1", name: "School One", location: "City One" },
+  { id: "school-2", name: "School Two", location: "City Two" },
+];
+
 describe("ManualAlumnusForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("renders all form fields", () => {
-    render(<ManualAlumnusForm />);
+    render(
+      <ManualAlumnusForm schools={mockSchools} defaultSchoolId="school-1" />,
+    );
 
+    expect(screen.getByLabelText(/Select your school/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Graduation Year/i)).toBeInTheDocument();
@@ -26,7 +34,9 @@ describe("ManualAlumnusForm", () => {
       .mocked(actions.createAlumnusAction)
       .mockResolvedValue({ success: true });
 
-    render(<ManualAlumnusForm />);
+    render(
+      <ManualAlumnusForm schools={mockSchools} defaultSchoolId="school-1" />,
+    );
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), {
       target: { value: "John Doe" },
@@ -50,6 +60,7 @@ describe("ManualAlumnusForm", () => {
           mail: "john@example.com",
           graduationYear: 2023,
           schoolSector: "CS",
+          schoolId: "school-1",
         }),
       );
     });
@@ -63,7 +74,9 @@ describe("ManualAlumnusForm", () => {
       fieldErrors: { mail: ["Invalid email"] },
     });
 
-    render(<ManualAlumnusForm />);
+    render(
+      <ManualAlumnusForm schools={mockSchools} defaultSchoolId="school-1" />,
+    );
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), {
       target: { value: "John Doe" },

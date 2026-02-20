@@ -6,7 +6,15 @@ import { ManualAlumnusForm } from "./ManualAlumnusForm";
 
 type Tab = "manual" | "bulk";
 
-export function NewAlumnusClient() {
+interface NewAlumnusClientProps {
+  schools: { id: string; name: string; location: string }[];
+  defaultSchoolId: string;
+}
+
+export function NewAlumnusClient({
+  schools,
+  defaultSchoolId,
+}: NewAlumnusClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>("manual");
 
   return (
@@ -40,7 +48,10 @@ export function NewAlumnusClient() {
         <div className="p-1">
           {activeTab === "manual" ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <ManualAlumnusForm />
+              <ManualAlumnusForm
+                schools={schools}
+                defaultSchoolId={defaultSchoolId}
+              />
             </div>
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">

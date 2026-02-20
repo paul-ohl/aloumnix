@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthService } from "@/lib/auth/service";
+import { getSchools } from "@/lib/services/SchoolService";
 import { NewAlumnusClient } from "./_components/NewAlumnusClient";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,14 @@ export default async function NewAlumnusPage() {
     redirect("/login/school");
   }
 
-  const school = {
+  const { items: schoolsData } = await getSchools({ limit: 100 });
+  const schools = schoolsData.map((s) => ({
+    id: s.id,
+    name: s.name,
+    location: s.location,
+  }));
+
+  const currentSchool = {
     id: session.userId,
     name: session.email, // In session, 'email' for school is its 'name'
   };
@@ -45,11 +53,14 @@ export default async function NewAlumnusPage() {
             Add New Students
           </h1>
           <p className="text-zinc-600 text-lg">
-            Add students to {school.name}.
+            Add students to {currentSchool.name}.
           </p>
         </header>
 
-        <NewAlumnusClient />
+        <NewAlumnusClient
+          schools={schools}
+          defaultSchoolId={currentSchool.id}
+        />
       </div>
     </main>
   );
