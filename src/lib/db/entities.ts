@@ -135,11 +135,11 @@ export class JobOffering {
   @Column()
   name!: string;
 
-  @Column({ nullable: true })
-  sectors?: string;
-
   @Column("text")
   details!: string;
+
+  @Column({ type: "jsonb", nullable: true })
+  additional_info?: Record<string, unknown>;
 
   @ManyToOne(
     () => School,

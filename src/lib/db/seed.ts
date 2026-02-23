@@ -63,8 +63,12 @@ export const seedDatabase = async (dataSource: DataSource) => {
     const jobsData = [
       {
         name: "Senior Software Engineer",
-        sectors: "Technology",
         details: `Great opportunity at a startup near ${school.location}.`,
+        additional_info: {
+          salary: "120k - 150k",
+          location: school.location,
+          startingDate: "2024-03-01",
+        },
         school,
       },
     ];

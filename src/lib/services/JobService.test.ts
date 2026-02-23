@@ -63,7 +63,6 @@ describe("JobService", () => {
 
       await getJobs({
         name: "Developer",
-        sectors: "IT",
         schoolId: "school-123",
         page: 3,
         limit: 20,
@@ -73,7 +72,6 @@ describe("JobService", () => {
         expect.objectContaining({
           where: expect.objectContaining({
             name: expect.anything(), // ILike result
-            sectors: expect.anything(), // ILike result
             school: { id: "school-123" },
           }),
           take: 20,
@@ -93,7 +91,11 @@ describe("JobService", () => {
 
   describe("createJob", () => {
     it("creates and saves a job offering", async () => {
-      const data = { name: "Frontend Engineer", sectors: "Tech" };
+      const data = {
+        name: "Frontend Engineer",
+        details: "Job details",
+        additional_info: { salary: "100k" },
+      };
       const result = await createJob(data);
 
       expect(mockDataSource.getRepository).toHaveBeenCalledWith(JobOffering);

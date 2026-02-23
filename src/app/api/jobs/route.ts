@@ -4,13 +4,12 @@ import { createJob, getJobs } from "@/lib/services/JobService";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const name = searchParams.get("name") || undefined;
-  const sectors = searchParams.get("sectors") || undefined;
   const schoolId = searchParams.get("schoolId") || undefined;
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "10", 10);
 
   try {
-    const result = await getJobs({ name, sectors, schoolId, page, limit });
+    const result = await getJobs({ name, schoolId, page, limit });
     return NextResponse.json(result);
   } catch (_error) {
     return NextResponse.json(

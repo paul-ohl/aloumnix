@@ -4,7 +4,6 @@ import { JobOffering } from "../db/entities";
 
 export interface JobFilters {
   name?: string;
-  sectors?: string;
   schoolId?: string;
   page?: number;
   limit?: number;
@@ -14,13 +13,12 @@ export const getJobs = async (filters: JobFilters = {}) => {
   const dataSource = await getDataSource();
   const repository = dataSource.getRepository(JobOffering);
 
-  const { name, sectors, schoolId, page = 1, limit = 10 } = filters;
+  const { name, schoolId, page = 1, limit = 10 } = filters;
   const skip = (page - 1) * limit;
 
   const where: FindOptionsWhere<JobOffering> = {};
 
   if (name) where.name = ILike(`%${name}%`);
-  if (sectors) where.sectors = ILike(`%${sectors}%`);
   if (schoolId) where.school = { id: schoolId };
 
   const options: FindManyOptions<JobOffering> = {
