@@ -53,6 +53,37 @@ export async function getJobsAction(filters: JobFilters = {}) {
   }
 }
 
+export async function seedJobsAction() {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  const schoolId = session.userId;
+
+  try {
+    for (let i = 1; i <= 25; i++) {
+      await createJob({
+        name: `Test Job Opening #${i}`,
+        details: `This is a detailed description for test job opening number ${i}. It was generated automatically to test pagination functionality.`,
+        additional_info: {
+          salary: `${Math.floor(Math.random() * 50 + 50)}k - ${Math.floor(Math.random() * 50 + 100)}k`,
+          location: i % 2 === 0 ? "Remote" : "On-site",
+          experience: `${(i % 5) + 1} years`,
+        },
+        school: { id: schoolId } as School,
+      });
+    }
+
+    revalidatePath("/school/dashboard");
+    revalidatePath("/alumni/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to seed jobs:", error);
+    return { error: "Failed to seed test jobs" };
+  }
+}
+
 export async function updateJobAction(id: string, data: JobCreationInput) {
   const session = await AuthService.getSession();
   if (!session || session.role !== "school") {
