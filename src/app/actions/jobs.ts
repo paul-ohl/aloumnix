@@ -5,10 +5,15 @@ import { AuthService } from "@/lib/auth/service";
 import type { School } from "@/lib/db/entities";
 import {
   createJob,
+  deleteJob,
+  deleteJobs,
+  getJobById,
   getJobs,
+  getJobsByIds,
   type JobFilters,
   updateJob,
 } from "@/lib/services/JobService";
+
 import {
   type JobCreationInput,
   jobCreationSchema,
@@ -155,5 +160,70 @@ export async function createJobAction(data: JobCreationInput) {
   } catch (error) {
     console.error("Failed to create job:", error);
     return { error: "Failed to create job opening" };
+  }
+}
+
+export async function deleteJobAction(id: string) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const job = await getJobById(id);
+
+    if (!job) {
+      return { error: "Job opening not found" };
+    }
+
+    if (job.school?.id !== session.userId) {
+      return { error: "Unauthorized" };
+    }
+
+    await deleteJob(id);
+
+    revalidatePath("/school/dashboard");
+    revalidatePath("/alumni/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete job:", error);
+    return { error: "Failed to delete job opening" };
+  }
+}
+
+export async function deleteJobsAction(ids: string[]) {
+  if (!ids.length) return { success: true };
+
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  const uniqueIds = [...new Set(ids)];
+
+  try {
+    const jobs = await getJobsByIds(uniqueIds);
+
+    if (jobs.length !== uniqueIds.length) {
+      return { error: "Some job openings were not found" };
+    }
+
+    const allOwnedBySchool = jobs.every(
+      (job) => job.school?.id === session.userId,
+    );
+    if (!allOwnedBySchool) {
+      return {
+        error: "Unauthorized: You don't own some of these job openings",
+      };
+    }
+
+    await deleteJobs(uniqueIds);
+
+    revalidatePath("/school/dashboard");
+    revalidatePath("/alumni/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete jobs:", error);
+    return { error: "Failed to delete job openings" };
   }
 }

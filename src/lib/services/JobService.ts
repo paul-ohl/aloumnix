@@ -1,4 +1,9 @@
-import { type FindManyOptions, type FindOptionsWhere, ILike } from "typeorm";
+import {
+  type FindManyOptions,
+  type FindOptionsWhere,
+  ILike,
+  In,
+} from "typeorm";
 import { getDataSource } from "../db/data-source";
 import { JobOffering } from "../db/entities";
 
@@ -40,6 +45,12 @@ export const getJobs = async (filters: JobFilters = {}) => {
   };
 };
 
+export const getJobById = async (id: string) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(JobOffering);
+  return await repository.findOne({ where: { id }, relations: ["school"] });
+};
+
 export const createJob = async (data: Partial<JobOffering>) => {
   const dataSource = await getDataSource();
   const repository = dataSource.getRepository(JobOffering);
@@ -53,4 +64,25 @@ export const updateJob = async (id: string, data: Partial<JobOffering>) => {
   // biome-ignore lint/suspicious/noExplicitAny: TypeORM update type mismatch with jsonb
   await repository.update(id, data as any);
   return await repository.findOne({ where: { id }, relations: ["school"] });
+};
+
+export const deleteJob = async (id: string) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(JobOffering);
+  return await repository.delete(id);
+};
+
+export const deleteJobs = async (ids: string[]) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(JobOffering);
+  return await repository.delete({ id: In(ids) });
+};
+
+export const getJobsByIds = async (ids: string[]) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(JobOffering);
+  return await repository.find({
+    where: { id: In(ids) },
+    relations: ["school"],
+  });
 };
