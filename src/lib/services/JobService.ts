@@ -46,3 +46,11 @@ export const createJob = async (data: Partial<JobOffering>) => {
   const job = repository.create(data);
   return await repository.save(job);
 };
+
+export const updateJob = async (id: string, data: Partial<JobOffering>) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(JobOffering);
+  // biome-ignore lint/suspicious/noExplicitAny: TypeORM update type mismatch with jsonb
+  await repository.update(id, data as any);
+  return await repository.findOne({ where: { id }, relations: ["school"] });
+};

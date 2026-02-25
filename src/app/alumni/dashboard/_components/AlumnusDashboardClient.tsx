@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { logoutAction } from "@/app/actions/auth";
+import { JobList } from "@/components/jobs/JobList";
 
 type Tab = "messages" | "events" | "jobs" | "account";
 
@@ -107,29 +108,8 @@ function DashboardTabs() {
         )}
 
         {activeTab === "jobs" && (
-          <div className="bg-white border border-zinc-200 rounded-2xl p-12 text-center dark:bg-zinc-900 dark:border-zinc-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-zinc-800">
-              <svg
-                className="w-8 h-8 text-zinc-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <title>Jobs Icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-              Job Board
-            </h3>
-            <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-              Explore career opportunities tailored for your network.
-            </p>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <JobList />
           </div>
         )}
 

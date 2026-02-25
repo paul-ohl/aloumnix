@@ -21,7 +21,7 @@ export default async function SchoolDashboardPage() {
           </p>
         </header>
 
-        <SchoolDashboardClient />
+        <SchoolDashboardClient schoolId={session.userId} />
       </div>
     </main>
   );
