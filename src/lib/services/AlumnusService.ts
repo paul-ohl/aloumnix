@@ -58,6 +58,24 @@ export const getAlumni = async (filters: AlumnusFilters = {}) => {
   };
 };
 
+export const getUniqueSchoolSectors = async (schoolId?: string) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(Alumnus);
+
+  const query = repository
+    .createQueryBuilder("alumnus")
+    .select("DISTINCT alumnus.schoolSector", "schoolSector")
+    .where("alumnus.schoolSector IS NOT NULL")
+    .orderBy("alumnus.schoolSector", "ASC");
+
+  if (schoolId) {
+    query.andWhere("alumnus.schoolId = :schoolId", { schoolId });
+  }
+
+  const result = await query.getRawMany();
+  return result.map((r) => r.schoolSector) as string[];
+};
+
 export const createAlumnus = async (data: Partial<Alumnus>) => {
   const dataSource = await getDataSource();
   const repository = dataSource.getRepository(Alumnus);

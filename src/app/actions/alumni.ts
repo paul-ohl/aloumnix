@@ -3,9 +3,28 @@
 import { revalidatePath } from "next/cache";
 import { AuthService } from "@/lib/auth/service";
 import type { Alumnus } from "@/lib/db/entities";
-import { createAlumni, createAlumnus } from "@/lib/services/AlumnusService";
+import {
+  createAlumni,
+  createAlumnus,
+  getUniqueSchoolSectors,
+} from "@/lib/services/AlumnusService";
 import type { AlumnusInput } from "@/lib/validation/alumni";
 import { alumnusSchema } from "@/lib/validation/alumni";
+
+export async function getUniqueSchoolSectorsAction() {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const sectors = await getUniqueSchoolSectors(session.userId);
+    return { sectors };
+  } catch (err) {
+    console.error("Error fetching school sectors:", err);
+    return { error: "Failed to fetch sectors" };
+  }
+}
 
 export async function createAlumnusAction(data: AlumnusInput) {
   const session = await AuthService.getSession();

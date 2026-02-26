@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { createAlumnusAction } from "@/app/actions/alumni";
+import {
+  createAlumnusAction,
+  getUniqueSchoolSectorsAction,
+} from "@/app/actions/alumni";
 import { SchoolSelect } from "@/components/auth/SchoolSelect";
 import type { AlumnusInput } from "@/lib/validation/alumni";
 
@@ -21,6 +24,17 @@ export function ManualAlumnusForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [success, setSuccess] = useState(false);
   const [selectedSchoolId, setSelectedSchoolId] = useState(defaultSchoolId);
+  const [existingSectors, setExistingSectors] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchSectors() {
+      const result = await getUniqueSchoolSectorsAction();
+      if (result.sectors) {
+        setExistingSectors(result.sectors);
+      }
+    }
+    fetchSectors();
+  }, []);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -186,7 +200,14 @@ export function ManualAlumnusForm({
               required
               placeholder="Computer Science"
               className={inputClasses}
+              list="sectors-list"
+              autoComplete="off"
             />
+            <datalist id="sectors-list">
+              {existingSectors.map((sector) => (
+                <option key={sector} value={sector} />
+              ))}
+            </datalist>
             {fieldErrors.schoolSector && (
               <p className={errorClasses}>{fieldErrors.schoolSector[0]}</p>
             )}
