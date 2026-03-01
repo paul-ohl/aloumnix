@@ -5,6 +5,7 @@ import { ManualAlumnusForm } from "./ManualAlumnusForm";
 
 vi.mock("@/app/actions/alumni", () => ({
   createAlumnusAction: vi.fn(),
+  getUniqueSchoolSectorsAction: vi.fn(async () => ({ sectors: [] })),
 }));
 
 const mockSchools = [

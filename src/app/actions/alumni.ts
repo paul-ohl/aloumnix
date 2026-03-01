@@ -4,12 +4,50 @@ import { revalidatePath } from "next/cache";
 import { AuthService } from "@/lib/auth/service";
 import type { Alumnus } from "@/lib/db/entities";
 import {
+  type AlumnusFilters,
   createAlumni,
   createAlumnus,
+  getAlumni,
   getUniqueSchoolSectors,
 } from "@/lib/services/AlumnusService";
 import type { AlumnusInput } from "@/lib/validation/alumni";
 import { alumnusSchema } from "@/lib/validation/alumni";
+
+export async function getAlumniAction(filters: AlumnusFilters = {}) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const result = await getAlumni({
+      ...filters,
+      schoolId: session.userId,
+    });
+
+    // Plainify entities to avoid "Only plain objects..." error when passing to Client Components
+    return {
+      ...result,
+      items: result.items.map((item) => ({
+        id: item.id,
+        fullName: item.fullName,
+        graduationYear: item.graduationYear,
+        class: item.class,
+        schoolSector: item.schoolSector,
+        mail: item.mail,
+        linkedInProfile: item.linkedInProfile,
+        professionalStatus: item.professionalStatus,
+        isPasswordSet: item.isPasswordSet,
+        school: { id: item.school?.id } as Alumnus["school"],
+        createdAt: item.createdAt.toISOString() as unknown as Date,
+        updatedAt: item.updatedAt.toISOString() as unknown as Date,
+      })),
+    };
+  } catch (err) {
+    console.error("Error fetching alumni:", err);
+    return { error: "Failed to fetch students" };
+  }
+}
 
 export async function getUniqueSchoolSectorsAction() {
   const session = await AuthService.getSession();

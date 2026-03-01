@@ -55,7 +55,7 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
       title: "Send Email",
       description:
         "Communicate with alumni via scheduled or manual email campaigns.",
-      href: "#",
+      href: "/school/dashboard/send-email",
       icon: (
         <svg
           className="w-6 h-6"
@@ -72,7 +72,6 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
           />
         </svg>
       ),
-      disabled: true,
     },
     {
       title: "Add Event",
