@@ -3,7 +3,7 @@
 import { In } from "typeorm";
 import { z } from "zod";
 import { getDataSource } from "@/lib/db/data-source";
-import { Alumnus, JobOffering, School } from "@/lib/db/entities";
+import { Alumnus, Event, JobOffering, School } from "@/lib/db/entities";
 import { type AlumnusFilters, getAlumni } from "@/lib/services/AlumnusService";
 import {
   type EmailData,
@@ -23,6 +23,14 @@ const sendEmailSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("job"),
     jobId: z.string().min(1, { message: "Job selection is required" }),
+    optionalMessage: z.string().optional(),
+    recipientIds: z.array(z.string()).optional(),
+    filters: z.record(z.string(), z.any()).optional(),
+    schoolId: z.string().min(1, { message: "School ID is required" }),
+  }),
+  z.object({
+    type: z.literal("event"),
+    eventId: z.string().min(1, { message: "Event selection is required" }),
     optionalMessage: z.string().optional(),
     recipientIds: z.array(z.string()).optional(),
     filters: z.record(z.string(), z.any()).optional(),
@@ -49,6 +57,7 @@ export async function sendEmailAction(input: SendEmailInput) {
     const alumnusRepo = dataSource.getRepository(Alumnus);
     const schoolRepo = dataSource.getRepository(School);
     const jobRepo = dataSource.getRepository(JobOffering);
+    const eventRepo = dataSource.getRepository(Event);
 
     // Get school name for the template
     const school = await schoolRepo.findOne({ where: { id: data.schoolId } });
@@ -88,7 +97,7 @@ export async function sendEmailAction(input: SendEmailInput) {
         message: data.message,
         schoolName: school.name,
       };
-    } else {
+    } else if (data.type === "job") {
       const job = await jobRepo.findOne({
         where: { id: data.jobId, school: { id: data.schoolId } },
       });
@@ -124,6 +133,28 @@ export async function sendEmailAction(input: SendEmailInput) {
         location,
         description,
         applyUrl,
+        schoolName: school.name,
+        optionalMessage: data.optionalMessage,
+      };
+    } else {
+      // type === "event"
+      const event = await eventRepo.findOne({
+        where: { id: data.eventId, school: { id: data.schoolId } },
+      });
+
+      if (!event) {
+        return { success: false, error: "Event not found" };
+      }
+
+      emailData = {
+        type: "event",
+        eventName: event.name,
+        location: event.location,
+        datetime: event.datetime.toLocaleString("en-US", {
+          dateStyle: "full",
+          timeStyle: "short",
+        }),
+        details: event.details,
         schoolName: school.name,
         optionalMessage: data.optionalMessage,
       };

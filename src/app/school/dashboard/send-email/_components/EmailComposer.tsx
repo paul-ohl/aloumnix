@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 // import { ArrowLeft, Loader2, Send } from "lucide-react";
 import { type SendEmailInput, sendEmailAction } from "@/app/actions/email";
+import { getEventsAction } from "@/app/actions/events";
 import { getJobsAction } from "@/app/actions/jobs";
 import type { AlumnusFilters } from "@/lib/services/AlumnusService";
 import type { MessageType } from "./MessageTypeSelector";
@@ -109,6 +110,19 @@ interface JobItem {
   } | null;
 }
 
+interface EventItem {
+  id: string;
+  name: string;
+  location: string;
+  datetime: string;
+  details: string;
+  school: {
+    id: string;
+    name: string;
+    location: string;
+  } | null;
+}
+
 export function EmailComposer({
   messageType,
   selectedAlumniIds,
@@ -130,6 +144,12 @@ export function EmailComposer({
   const [selectedJobId, setSelectedJobId] = useState("");
   const [optionalMessage, setOptionalMessage] = useState("");
 
+  // Event specific states
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState("");
+  const [eventOptionalMessage, setEventOptionalMessage] = useState("");
+
   // Fetch jobs if messageType is 'job'
   useEffect(() => {
     if (messageType === "job") {
@@ -144,6 +164,24 @@ export function EmailComposer({
         })
         .finally(() => {
           setIsLoadingJobs(false);
+        });
+    }
+  }, [messageType, schoolId]);
+
+  // Fetch events if messageType is 'event'
+  useEffect(() => {
+    if (messageType === "event") {
+      setIsLoadingEvents(true);
+      getEventsAction({ schoolId, limit: 100 })
+        .then((result) => {
+          if (result.success && result.items) {
+            setEvents(result.items as EventItem[]);
+          } else {
+            setError(result.error || "Failed to fetch events");
+          }
+        })
+        .finally(() => {
+          setIsLoadingEvents(false);
         });
     }
   }, [messageType, schoolId]);
@@ -168,8 +206,7 @@ export function EmailComposer({
               : undefined,
           schoolId,
         };
-      } else {
-        // Find selected job to get its details
+      } else if (messageType === "job") {
         const selectedJob = jobs.find((j) => j.id === selectedJobId);
 
         if (!selectedJob) {
@@ -181,6 +218,27 @@ export function EmailComposer({
           type: "job",
           jobId: selectedJobId,
           optionalMessage: optionalMessage || undefined,
+          recipientIds:
+            selectedAlumniIds.length > 0 ? selectedAlumniIds : undefined,
+          filters:
+            selectedAlumniIds.length === 0
+              ? (filters as SendEmailInput["filters"])
+              : undefined,
+          schoolId,
+        };
+      } else {
+        // messageType === "event"
+        const selectedEvent = events.find((ev) => ev.id === selectedEventId);
+
+        if (!selectedEvent) {
+          setError("Please select an event");
+          return;
+        }
+
+        input = {
+          type: "event",
+          eventId: selectedEventId,
+          optionalMessage: eventOptionalMessage || undefined,
           recipientIds:
             selectedAlumniIds.length > 0 ? selectedAlumniIds : undefined,
           filters:
@@ -267,7 +325,7 @@ export function EmailComposer({
               />
             </div>
           </>
-        ) : (
+        ) : messageType === "job" ? (
           <div className="space-y-6">
             <div className="space-y-2">
               <label
@@ -375,6 +433,131 @@ export function EmailComposer({
               />
             </div>
           </div>
+        ) : (
+          // messageType === "event"
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label
+                htmlFor="eventSelection"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Select Event
+              </label>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <select
+                    id="eventSelection"
+                    required
+                    value={selectedEventId}
+                    onChange={(e) => setSelectedEventId(e.target.value)}
+                    disabled={isLoadingEvents || events.length === 0}
+                    className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 focus:border-transparent transition-all outline-none appearance-none disabled:opacity-50"
+                  >
+                    {isLoadingEvents ? (
+                      <option>Loading events...</option>
+                    ) : events.length === 0 ? (
+                      <option>No events found</option>
+                    ) : (
+                      <>
+                        <option value="" disabled>
+                          Choose an event
+                        </option>
+                        {events.map((ev) => (
+                          <option key={ev.id} value={ev.id}>
+                            {ev.name}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <a
+                  href="/school/dashboard?tab=events"
+                  className="flex items-center justify-center px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 font-medium rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all whitespace-nowrap"
+                >
+                  <PlusIcon className="w-5 h-5 mr-2" />
+                  New Event
+                </a>
+              </div>
+            </div>
+
+            {selectedEventId && (
+              <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl animate-in fade-in zoom-in-95 duration-300">
+                <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                  Event Preview
+                </h3>
+                <div className="space-y-1 text-sm">
+                  <p className="text-zinc-600 dark:text-zinc-400">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                      Name:
+                    </span>{" "}
+                    {events.find((ev) => ev.id === selectedEventId)?.name}
+                  </p>
+                  <p className="text-zinc-600 dark:text-zinc-400">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                      Location:
+                    </span>{" "}
+                    {events.find((ev) => ev.id === selectedEventId)?.location}
+                  </p>
+                  <p className="text-zinc-600 dark:text-zinc-400">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                      Date:
+                    </span>{" "}
+                    {(() => {
+                      const dt = events.find(
+                        (ev) => ev.id === selectedEventId,
+                      )?.datetime;
+                      return dt
+                        ? new Date(dt).toLocaleString("en-US", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })
+                        : "";
+                    })()}
+                  </p>
+                  <p className="line-clamp-2 text-zinc-500 dark:text-zinc-500 mt-2 italic">
+                    {events.find((ev) => ev.id === selectedEventId)?.details}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label
+                htmlFor="eventOptionalMessage"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Optional Message{" "}
+                <span className="text-zinc-400 font-normal">
+                  (Included in email)
+                </span>
+              </label>
+              <textarea
+                id="eventOptionalMessage"
+                rows={4}
+                value={eventOptionalMessage}
+                onChange={(e) => setEventOptionalMessage(e.target.value)}
+                placeholder="Add a note about this event..."
+                className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 focus:border-transparent transition-all outline-none resize-none"
+              />
+            </div>
+          </div>
         )}
 
         {error && (
@@ -386,7 +569,11 @@ export function EmailComposer({
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            disabled={isPending || (messageType === "job" && !selectedJobId)}
+            disabled={
+              isPending ||
+              (messageType === "job" && !selectedJobId) ||
+              (messageType === "event" && !selectedEventId)
+            }
             className="flex items-center justify-center px-8 py-3 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-bold rounded-2xl hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-zinc-900/10 dark:shadow-zinc-50/10 min-w-[160px]"
           >
             {isPending ? (

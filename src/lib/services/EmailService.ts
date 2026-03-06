@@ -1,4 +1,5 @@
 import { render } from "@react-email/render";
+import { EventEmail } from "@/components/emails/EventEmail";
 import { GeneralEmail } from "@/components/emails/GeneralEmail";
 import { JobEmail } from "@/components/emails/JobEmail";
 import { resend } from "@/lib/email/client";
@@ -26,7 +27,17 @@ export type JobEmailData = {
   optionalMessage?: string;
 };
 
-export type EmailData = GeneralEmailData | JobEmailData;
+export type EventEmailData = {
+  type: "event";
+  eventName: string;
+  location: string;
+  datetime: string;
+  details: string;
+  schoolName: string;
+  optionalMessage?: string;
+};
+
+export type EmailData = GeneralEmailData | JobEmailData | EventEmailData;
 
 /**
  * Service to handle email operations using Resend.
@@ -83,6 +94,25 @@ export const EmailService = {
               return {
                 ...common,
                 subject: emailData.subject,
+                html,
+              };
+            }
+
+            if (emailData.type === "event") {
+              const html = await render(
+                EventEmail({
+                  eventName: emailData.eventName,
+                  location: emailData.location,
+                  datetime: emailData.datetime,
+                  details: emailData.details,
+                  schoolName: emailData.schoolName,
+                  optionalMessage: emailData.optionalMessage,
+                }),
+              );
+
+              return {
+                ...common,
+                subject: `Upcoming Event: ${emailData.eventName}`,
                 html,
               };
             }
