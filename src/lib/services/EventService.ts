@@ -2,6 +2,7 @@ import {
   type FindManyOptions,
   type FindOptionsWhere,
   ILike,
+  In,
   MoreThanOrEqual,
 } from "typeorm";
 import { getDataSource } from "../db/data-source";
@@ -54,4 +55,41 @@ export const createEvent = async (data: Partial<Event>) => {
   const repository = dataSource.getRepository(Event);
   const event = repository.create(data);
   return await repository.save(event);
+};
+
+export const getEventById = async (id: string) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(Event);
+  return await repository.findOne({ where: { id }, relations: ["school"] });
+};
+
+export const updateEvent = async (
+  id: string,
+  data: Partial<Omit<Event, "school">>,
+) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(Event);
+  await repository.update(id, data);
+  return await repository.findOne({ where: { id }, relations: ["school"] });
+};
+
+export const deleteEvent = async (id: string) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(Event);
+  await repository.delete(id);
+};
+
+export const deleteEvents = async (ids: string[]) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(Event);
+  await repository.delete({ id: In(ids) });
+};
+
+export const getEventsByIds = async (ids: string[]) => {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(Event);
+  return await repository.find({
+    where: { id: In(ids) },
+    relations: ["school"],
+  });
 };

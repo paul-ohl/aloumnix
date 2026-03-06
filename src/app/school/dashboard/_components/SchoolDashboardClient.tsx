@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
 import { Suspense } from "react";
 import { logoutAction } from "@/app/actions/auth";
+import { EventList } from "@/components/events/EventList";
 import { JobList } from "@/components/jobs/JobList";
 
 type Tab = "actions" | "events" | "jobs" | "account";
@@ -27,7 +29,14 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
   const router = useRouter();
   const activeTab = (searchParams.get("tab") as Tab) || "actions";
 
-  const actions = [
+  const actions: {
+    title: string;
+    description: string;
+    href: string;
+    icon: React.ReactElement;
+    primary?: boolean;
+    disabled?: boolean;
+  }[] = [
     {
       title: "Add New Students",
       description:
@@ -76,7 +85,7 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
     {
       title: "Add Event",
       description: "Organize reunions, networking sessions, or workshops.",
-      href: "#",
+      href: "/school/dashboard/events/new",
       icon: (
         <svg
           className="w-6 h-6"
@@ -93,7 +102,6 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
           />
         </svg>
       ),
-      disabled: true,
     },
     {
       title: "Add Job Opening",
@@ -221,29 +229,8 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
         )}
 
         {activeTab === "events" && (
-          <div className="bg-white border border-zinc-200 rounded-2xl p-12 text-center dark:bg-zinc-900 dark:border-zinc-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-zinc-800">
-              <svg
-                className="w-8 h-8 text-zinc-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <title>Events Icon</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-              No Upcoming Events
-            </h3>
-            <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-              Events you organize will appear here.
-            </p>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <EventList showPostButton schoolId={schoolId} />
           </div>
         )}
 
