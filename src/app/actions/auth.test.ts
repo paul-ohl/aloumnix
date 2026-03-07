@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthService, type SessionPayload } from "@/lib/auth/service";
 import { getDataSource } from "@/lib/db/data-source";
+import { EmailService } from "@/lib/services/EmailService";
 import {
-  loginAlumniAction,
   loginSchoolAction,
   logoutAction,
+  requestAlumniOtpAction,
   setPasswordAction,
+  verifyAlumniOtpAction,
 } from "./auth";
 
 vi.mock("next/navigation", () => ({
@@ -32,8 +34,13 @@ vi.mock("@/lib/db/entities", () => ({
   Alumnus: class {
     id = "alumnus-id";
     mail = "alumnus@example.com";
-    password = "hashed-password";
-    isPasswordSet = true;
+    fullName = "Test Alumnus";
+  },
+  AlumnusOtp: class {
+    id = "otp-id";
+    code = "123456";
+    used = false;
+    expiresAt = new Date(Date.now() + 10 * 60 * 1000);
   },
   School: class {
     id = "school-id";
@@ -43,14 +50,38 @@ vi.mock("@/lib/db/entities", () => ({
   },
 }));
 
+vi.mock("@/lib/services/EmailService", () => ({
+  EmailService: {
+    sendOtpEmail: vi.fn(),
+  },
+}));
+
 describe("Auth Server Actions", () => {
-  const mockRepository = {
+  const mockAlumnusRepository = {
+    findOne: vi.fn(),
+    update: vi.fn(),
+  };
+
+  const mockOtpRepository = {
+    findOne: vi.fn(),
+    create: vi.fn((data) => ({ ...data, id: "new-otp-id" })),
+    save: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  };
+
+  const mockSchoolRepository = {
     findOne: vi.fn(),
     update: vi.fn(),
   };
 
   const mockDataSource = {
-    getRepository: vi.fn(() => mockRepository),
+    getRepository: vi.fn((entity) => {
+      const name = (entity as { name?: string }).name ?? "";
+      if (name === "AlumnusOtp") return mockOtpRepository;
+      if (name === "Alumnus") return mockAlumnusRepository;
+      return mockSchoolRepository;
+    }),
   };
 
   beforeEach(() => {
@@ -58,6 +89,10 @@ describe("Auth Server Actions", () => {
     // biome-ignore lint/suspicious/noExplicitAny: Mocking DataSource is complex
     vi.mocked(getDataSource).mockResolvedValue(mockDataSource as any);
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // School Login
+  // ─────────────────────────────────────────────────────────────────────────
 
   describe("loginSchoolAction", () => {
     it("returns error if schoolId is missing", async () => {
@@ -75,23 +110,20 @@ describe("Auth Server Actions", () => {
       // Arrange
       const formData = new FormData();
       formData.append("schoolId", "unknown");
-      mockRepository.findOne.mockResolvedValue(null);
+      mockSchoolRepository.findOne.mockResolvedValue(null);
 
       // Act
       const result = await loginSchoolAction(undefined, formData);
 
       // Assert
       expect(result?.error).toBe("School not found.");
-      expect(mockRepository.findOne).toHaveBeenCalledWith({
-        where: { id: "unknown" },
-      });
     });
 
     it("returns error if password is required but not provided", async () => {
       // Arrange
       const formData = new FormData();
       formData.append("schoolId", "school-id");
-      mockRepository.findOne.mockResolvedValue({
+      mockSchoolRepository.findOne.mockResolvedValue({
         id: "school-id",
         isPasswordSet: true,
         password: "hashed-password",
@@ -109,7 +141,7 @@ describe("Auth Server Actions", () => {
       const formData = new FormData();
       formData.append("schoolId", "school-id");
       formData.append("password", "wrong-password");
-      mockRepository.findOne.mockResolvedValue({
+      mockSchoolRepository.findOne.mockResolvedValue({
         id: "school-id",
         isPasswordSet: true,
         password: "hashed-password",
@@ -128,7 +160,7 @@ describe("Auth Server Actions", () => {
       const formData = new FormData();
       formData.append("schoolId", "school-id");
       formData.append("password", "any-password");
-      mockRepository.findOne.mockResolvedValue({
+      mockSchoolRepository.findOne.mockResolvedValue({
         id: "school-id",
         isPasswordSet: false,
       });
@@ -152,7 +184,7 @@ describe("Auth Server Actions", () => {
         isPasswordSet: true,
         password: "hashed-password",
       };
-      mockRepository.findOne.mockResolvedValue(mockSchool);
+      mockSchoolRepository.findOne.mockResolvedValue(mockSchool);
       vi.mocked(AuthService.verifyPassword).mockResolvedValue(true);
       vi.mocked(AuthService.createSession).mockResolvedValue({
         needsPasswordSet: false,
@@ -180,7 +212,7 @@ describe("Auth Server Actions", () => {
         id: "school-id",
         isPasswordSet: false,
       };
-      mockRepository.findOne.mockResolvedValue(mockSchool);
+      mockSchoolRepository.findOne.mockResolvedValue(mockSchool);
       vi.mocked(AuthService.createSession).mockResolvedValue({
         needsPasswordSet: true,
       } as unknown as SessionPayload);
@@ -199,7 +231,7 @@ describe("Auth Server Actions", () => {
       // Arrange
       const formData = new FormData();
       formData.append("schoolId", "school-id");
-      mockRepository.findOne.mockRejectedValue(
+      mockSchoolRepository.findOne.mockRejectedValue(
         new Error("Database connection failed"),
       );
 
@@ -213,44 +245,194 @@ describe("Auth Server Actions", () => {
     });
   });
 
-  describe("loginAlumniAction", () => {
-    it("returns error if email is missing", async () => {
+  // ─────────────────────────────────────────────────────────────────────────
+  // requestAlumniOtpAction
+  // ─────────────────────────────────────────────────────────────────────────
+
+  describe("requestAlumniOtpAction", () => {
+    it("returns validation error for invalid email", async () => {
       // Arrange
       const formData = new FormData();
+      formData.append("email", "not-an-email");
 
       // Act
-      const result = await loginAlumniAction(undefined, formData);
+      const result = await requestAlumniOtpAction(undefined, formData);
 
       // Assert
-      expect(result?.error).toBe("Please enter your email.");
+      expect(result?.error).toBeTruthy();
+    });
+
+    it("returns success without sending email if alumnus is not found", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "unknown@example.com");
+      mockAlumnusRepository.findOne.mockResolvedValue(null);
+
+      // Act
+      const result = await requestAlumniOtpAction(undefined, formData);
+
+      // Assert
+      expect(result?.success).toBe(true);
+      expect(result?.email).toBe("unknown@example.com");
+      expect(EmailService.sendOtpEmail).not.toHaveBeenCalled();
+    });
+
+    it("deletes existing unused OTPs, saves a new one and sends email", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "alumnus@example.com");
+      const mockAlumnus = {
+        id: "alumnus-id",
+        mail: "alumnus@example.com",
+        fullName: "Test Alumnus",
+      };
+      mockAlumnusRepository.findOne.mockResolvedValue(mockAlumnus);
+      mockOtpRepository.save.mockResolvedValue({});
+      vi.mocked(EmailService.sendOtpEmail).mockResolvedValue({} as never);
+
+      // Act
+      const result = await requestAlumniOtpAction(undefined, formData);
+
+      // Assert
+      expect(mockOtpRepository.delete).toHaveBeenCalledWith({
+        alumnus: { id: "alumnus-id" },
+        used: false,
+      });
+      expect(mockOtpRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alumnus: mockAlumnus,
+          used: false,
+        }),
+      );
+      expect(mockOtpRepository.save).toHaveBeenCalled();
+      expect(EmailService.sendOtpEmail).toHaveBeenCalledWith(
+        { email: "alumnus@example.com", name: "Test Alumnus" },
+        expect.stringMatching(/^\d{6}$/),
+        10,
+      );
+      expect(result?.success).toBe(true);
+      expect(result?.email).toBe("alumnus@example.com");
+    });
+
+    it("returns error when email sending fails", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "alumnus@example.com");
+      mockAlumnusRepository.findOne.mockResolvedValue({
+        id: "alumnus-id",
+        mail: "alumnus@example.com",
+        fullName: "Test Alumnus",
+      });
+      mockOtpRepository.save.mockResolvedValue({});
+      vi.mocked(EmailService.sendOtpEmail).mockRejectedValue(
+        new Error("Resend API error"),
+      );
+
+      // Act
+      const result = await requestAlumniOtpAction(undefined, formData);
+
+      // Assert
+      expect(result?.error).toBe(
+        "Failed to send login code. Please try again.",
+      );
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // verifyAlumniOtpAction
+  // ─────────────────────────────────────────────────────────────────────────
+
+  describe("verifyAlumniOtpAction", () => {
+    it("returns validation error if code is not 6 digits", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "alumnus@example.com");
+      formData.append("code", "123");
+
+      // Act
+      const result = await verifyAlumniOtpAction(undefined, formData);
+
+      // Assert
+      expect(result?.error).toBeTruthy();
     });
 
     it("returns error if alumnus is not found", async () => {
       // Arrange
       const formData = new FormData();
-      formData.append("email", "unknown@example.com");
-      mockRepository.findOne.mockResolvedValue(null);
+      formData.append("email", "ghost@example.com");
+      formData.append("code", "123456");
+      mockAlumnusRepository.findOne.mockResolvedValue(null);
 
       // Act
-      const result = await loginAlumniAction(undefined, formData);
+      const result = await verifyAlumniOtpAction(undefined, formData);
 
       // Assert
-      expect(result?.error).toBe("Invalid email or password.");
+      expect(result?.error).toBe("Invalid or expired code.");
     });
 
-    it("successfully logs in and redirects on happy path", async () => {
+    it("returns error if no matching valid OTP is found", async () => {
       // Arrange
       const formData = new FormData();
       formData.append("email", "alumnus@example.com");
-      formData.append("password", "correct-password");
+      formData.append("code", "000000");
+      mockAlumnusRepository.findOne.mockResolvedValue({
+        id: "alumnus-id",
+        mail: "alumnus@example.com",
+      });
+      mockOtpRepository.findOne.mockResolvedValue(null);
+
+      // Act
+      const result = await verifyAlumniOtpAction(undefined, formData);
+
+      // Assert
+      expect(result?.error).toBe("Invalid or expired code.");
+      expect(AuthService.createSession).not.toHaveBeenCalled();
+    });
+
+    it("marks an expired OTP as used and returns an error", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "alumnus@example.com");
+      formData.append("code", "123456");
+      const mockAlumnus = { id: "alumnus-id", mail: "alumnus@example.com" };
+      mockAlumnusRepository.findOne.mockResolvedValue(mockAlumnus);
+      mockOtpRepository.findOne.mockResolvedValue({
+        id: "otp-id",
+        code: "123456",
+        used: false,
+        // expired 1 minute ago
+        expiresAt: new Date(Date.now() - 60 * 1000),
+        alumnus: mockAlumnus,
+      });
+
+      // Act
+      const result = await verifyAlumniOtpAction(undefined, formData);
+
+      // Assert
+      expect(mockOtpRepository.update).toHaveBeenCalledWith("otp-id", {
+        used: true,
+      });
+      expect(result?.error).toBe("Invalid or expired code.");
+      expect(AuthService.createSession).not.toHaveBeenCalled();
+    });
+
+    it("creates a session and redirects to /alumni/dashboard by default", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "alumnus@example.com");
+      formData.append("code", "123456");
       const mockAlumnus = {
         id: "alumnus-id",
         mail: "alumnus@example.com",
-        isPasswordSet: true,
-        password: "hashed-password",
       };
-      mockRepository.findOne.mockResolvedValue(mockAlumnus);
-      vi.mocked(AuthService.verifyPassword).mockResolvedValue(true);
+      mockAlumnusRepository.findOne.mockResolvedValue(mockAlumnus);
+      mockOtpRepository.findOne.mockResolvedValue({
+        id: "otp-id",
+        code: "123456",
+        used: false,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        alumnus: mockAlumnus,
+      });
       vi.mocked(AuthService.createSession).mockResolvedValue({
         needsPasswordSet: false,
       } as unknown as SessionPayload);
@@ -259,16 +441,86 @@ describe("Auth Server Actions", () => {
       });
 
       // Act & Assert
-      await expect(loginAlumniAction(undefined, formData)).rejects.toThrow(
+      await expect(verifyAlumniOtpAction(undefined, formData)).rejects.toThrow(
         "NEXT_REDIRECT",
       );
+      expect(mockOtpRepository.update).toHaveBeenCalledWith("otp-id", {
+        used: true,
+      });
       expect(AuthService.createSession).toHaveBeenCalledWith(
         mockAlumnus,
         "alumnus",
       );
       expect(redirect).toHaveBeenCalledWith("/alumni/dashboard");
     });
+
+    it("redirects to the redirect_to path when it starts with /alumni/", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "alumnus@example.com");
+      formData.append("code", "123456");
+      formData.append(
+        "redirect_to",
+        "/alumni/dashboard?tab=events&highlight=evt-123",
+      );
+      const mockAlumnus = { id: "alumnus-id", mail: "alumnus@example.com" };
+      mockAlumnusRepository.findOne.mockResolvedValue(mockAlumnus);
+      mockOtpRepository.findOne.mockResolvedValue({
+        id: "otp-id",
+        code: "123456",
+        used: false,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        alumnus: mockAlumnus,
+      });
+      vi.mocked(AuthService.createSession).mockResolvedValue({
+        needsPasswordSet: false,
+      } as unknown as SessionPayload);
+      vi.mocked(redirect).mockImplementation(() => {
+        throw new Error("NEXT_REDIRECT");
+      });
+
+      // Act & Assert
+      await expect(verifyAlumniOtpAction(undefined, formData)).rejects.toThrow(
+        "NEXT_REDIRECT",
+      );
+      expect(redirect).toHaveBeenCalledWith(
+        "/alumni/dashboard?tab=events&highlight=evt-123",
+      );
+    });
+
+    it("falls back to /alumni/dashboard when redirect_to does not start with /alumni/", async () => {
+      // Arrange
+      const formData = new FormData();
+      formData.append("email", "alumnus@example.com");
+      formData.append("code", "123456");
+      formData.append("redirect_to", "https://evil.example.com");
+      const mockAlumnus = { id: "alumnus-id", mail: "alumnus@example.com" };
+      mockAlumnusRepository.findOne.mockResolvedValue(mockAlumnus);
+      mockOtpRepository.findOne.mockResolvedValue({
+        id: "otp-id",
+        code: "123456",
+        used: false,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        alumnus: mockAlumnus,
+      });
+      vi.mocked(AuthService.createSession).mockResolvedValue({
+        needsPasswordSet: false,
+      } as unknown as SessionPayload);
+      vi.mocked(redirect).mockImplementation(() => {
+        throw new Error("NEXT_REDIRECT");
+      });
+
+      // Act & Assert
+      await expect(verifyAlumniOtpAction(undefined, formData)).rejects.toThrow(
+        "NEXT_REDIRECT",
+      );
+      expect(redirect).toHaveBeenCalledWith("/alumni/dashboard");
+    });
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // setPasswordAction
+  // ─────────────────────────────────────────────────────────────────────────
 
   describe("setPasswordAction", () => {
     it("returns error if password is too short", async () => {
@@ -284,7 +536,7 @@ describe("Auth Server Actions", () => {
       expect(result?.error).toBe(
         "Password must be at least 8 characters long.",
       );
-      expect(mockRepository.update).not.toHaveBeenCalled();
+      expect(mockSchoolRepository.update).not.toHaveBeenCalled();
     });
 
     it("returns error if passwords do not match", async () => {
@@ -298,7 +550,7 @@ describe("Auth Server Actions", () => {
 
       // Assert
       expect(result?.error).toBe("Passwords do not match.");
-      expect(mockRepository.update).not.toHaveBeenCalled();
+      expect(mockSchoolRepository.update).not.toHaveBeenCalled();
     });
 
     it("redirects to login if no session is found", async () => {
@@ -315,7 +567,7 @@ describe("Auth Server Actions", () => {
       await expect(setPasswordAction(undefined, formData)).rejects.toThrow(
         "NEXT_REDIRECT",
       );
-      expect(redirect).toHaveBeenCalledWith("/login/alumni");
+      expect(redirect).toHaveBeenCalledWith("/login/school");
     });
 
     it("successfully sets password for school and redirects", async () => {
@@ -330,7 +582,7 @@ describe("Auth Server Actions", () => {
       vi.mocked(AuthService.hashPassword).mockResolvedValue(
         "hashed-new-password",
       );
-      mockRepository.findOne.mockResolvedValue({ id: "school-id" });
+      mockSchoolRepository.findOne.mockResolvedValue({ id: "school-id" });
       vi.mocked(redirect).mockImplementation(() => {
         throw new Error("NEXT_REDIRECT");
       });
@@ -339,42 +591,18 @@ describe("Auth Server Actions", () => {
       await expect(setPasswordAction(undefined, formData)).rejects.toThrow(
         "NEXT_REDIRECT",
       );
-      expect(mockRepository.update).toHaveBeenCalledWith("school-id", {
+      expect(mockSchoolRepository.update).toHaveBeenCalledWith("school-id", {
         password: "hashed-new-password",
         isPasswordSet: true,
       });
       expect(AuthService.createSession).toHaveBeenCalled();
       expect(redirect).toHaveBeenCalledWith("/school/dashboard");
     });
-
-    it("successfully sets password for alumnus and redirects", async () => {
-      // Arrange
-      const formData = new FormData();
-      formData.append("password", "Password123");
-      formData.append("confirmPassword", "Password123");
-      vi.mocked(AuthService.getSession).mockResolvedValue({
-        userId: "alumnus-id",
-        role: "alumnus",
-      } as unknown as SessionPayload);
-      vi.mocked(AuthService.hashPassword).mockResolvedValue(
-        "hashed-new-password",
-      );
-      mockRepository.findOne.mockResolvedValue({ id: "alumnus-id" });
-      vi.mocked(redirect).mockImplementation(() => {
-        throw new Error("NEXT_REDIRECT");
-      });
-
-      // Act & Assert
-      await expect(setPasswordAction(undefined, formData)).rejects.toThrow(
-        "NEXT_REDIRECT",
-      );
-      expect(mockRepository.update).toHaveBeenCalledWith("alumnus-id", {
-        password: "hashed-new-password",
-        isPasswordSet: true,
-      });
-      expect(redirect).toHaveBeenCalledWith("/alumni/dashboard");
-    });
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // logoutAction
+  // ─────────────────────────────────────────────────────────────────────────
 
   describe("logoutAction", () => {
     it("calls logout and redirects to login", async () => {

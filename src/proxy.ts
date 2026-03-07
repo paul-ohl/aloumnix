@@ -34,19 +34,33 @@ export async function proxy(request: NextRequest) {
 
   // 2. All other routes are protected
   if (!token) {
-    return NextResponse.redirect(new URL("/login/alumni", request.url));
+    const loginUrl = new URL("/login/alumni", request.url);
+    loginUrl.searchParams.set(
+      "redirect_to",
+      request.nextUrl.pathname + request.nextUrl.search,
+    );
+    return NextResponse.redirect(loginUrl);
   }
 
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
 
-    // If password needs to be set, redirect to /set-password
-    if (payload.needsPasswordSet && pathname !== "/set-password") {
+    // If school needs to set password, redirect to /set-password
+    if (
+      payload.role === "school" &&
+      payload.needsPasswordSet &&
+      pathname !== "/set-password"
+    ) {
       return NextResponse.redirect(new URL("/set-password", request.url));
     }
   } catch (_error) {
     // Invalid token
-    return NextResponse.redirect(new URL("/login/alumni", request.url));
+    const loginUrl = new URL("/login/alumni", request.url);
+    loginUrl.searchParams.set(
+      "redirect_to",
+      request.nextUrl.pathname + request.nextUrl.search,
+    );
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
