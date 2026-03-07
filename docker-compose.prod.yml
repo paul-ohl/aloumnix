@@ -1,0 +1,46 @@
+# Production compose file.
+# Requires a .env file (or environment variables) with the values listed in .env.example
+# plus JWT_SECRET, RESEND_API_KEY, and NEXT_PUBLIC_APP_URL.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB:       ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV:              production
+      DB_HOST:               db
+      DB_PORT:               5432
+      DB_USER:               ${DB_USER}
+      DB_PASSWORD:           ${DB_PASSWORD}
+      DB_NAME:               ${DB_NAME}
+      JWT_SECRET:            ${JWT_SECRET}
+      RESEND_API_KEY:        ${RESEND_API_KEY}
+      NEXT_PUBLIC_APP_URL:   ${NEXT_PUBLIC_APP_URL}
+
+volumes:
+  postgres_data:

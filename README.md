@@ -91,7 +91,7 @@ cp .env.example .env
 ### 3. Start the database
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 This starts PostgreSQL on port `5432` and Adminer (a web database GUI) on port `8080`.
@@ -121,8 +121,8 @@ On first boot in development mode, the database schema is auto-synced via TypeOR
 | Run all tests | `pnpm test` |
 | Run a single test file | `pnpm vitest run src/path/to/file.test.ts` |
 | Watch tests | `pnpm test:watch` |
-| Start database | `docker compose up -d` |
-| Stop database | `docker compose down` |
+| Start dev database | `docker compose -f docker-compose.dev.yml up -d` |
+| Stop dev database | `docker compose -f docker-compose.dev.yml down` |
 
 ---
 
@@ -185,72 +185,72 @@ Email templates live in `src/components/emails/`:
 
 ## Self-hosting (production)
 
-Aloumnix is a standard Next.js application and can be hosted anywhere that supports Node.js.
+The repository ships with a `Dockerfile` and `docker-compose.prod.yml` that together run the Next.js app and a PostgreSQL database. Docker and Docker Compose are the only requirements on the host machine.
 
-### Option A — Node.js server
+### 1. Create a production `.env` file
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm build
-pnpm start          # starts on port 3000 by default
+cp .env.example .env
 ```
 
-Set `PORT` to override the port. Use a reverse proxy (nginx, Caddy) in front of it.
-
-### Option B — Docker
-
-A minimal `Dockerfile` example:
-
-```dockerfile
-FROM node:20-alpine AS base
-RUN npm install -g pnpm
-
-FROM base AS deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN pnpm build
-
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
-EXPOSE 3000
-CMD ["node", "server.js"]
-```
-
-> This requires `output: "standalone"` in `next.config.ts`. Add it if you use this approach.
-
-### Option C — Vercel
-
-Deploy directly from the repository. Set all environment variables in the Vercel project settings. The database must be accessible from Vercel's network (use a managed PostgreSQL provider such as Supabase, Neon, or Railway).
-
-### Required environment variables in production
+Fill in every variable — there are no safe defaults in production:
 
 ```
-DB_HOST=
+DB_HOST=db
 DB_PORT=5432
-DB_USER=
-DB_PASSWORD=
-DB_NAME=
-JWT_SECRET=<long random secret>
-RESEND_API_KEY=
+DB_USER=aloumnix
+DB_PASSWORD=<strong password>
+DB_NAME=aloumnix
+JWT_SECRET=<output of: openssl rand -hex 32>
+RESEND_API_KEY=<from resend.com>
 NEXT_PUBLIC_APP_URL=https://yourdomain.com
 NODE_ENV=production
 ```
 
-> **Important:** `JWT_SECRET` must be a strong random value (e.g. `openssl rand -hex 32`). The fallback value used in development is not safe for production.
+> **`JWT_SECRET`** must be a strong random value. The fallback used in development is not safe for production.
+> **`DB_HOST`** must be `db` — the Compose service name that the app container resolves to.
+
+### 2. Build and start
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+The app is available on port `3000` (override with `PORT=` in your `.env`). Place a reverse proxy (nginx, Caddy, Traefik) in front of it to terminate TLS.
+
+### 3. Subsequent deploys
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build --no-deps app
+```
+
+This rebuilds and restarts only the `app` container without touching the database.
+
+### 4. Stopping
+
+```bash
+docker compose -f docker-compose.prod.yml down
+```
+
+The `postgres_data` volume is preserved. To also remove the volume (destroys all data):
+
+```bash
+docker compose -f docker-compose.prod.yml down -v
+```
 
 ---
 
-## Testing
+### Database migrations in production
+
+`synchronize: true` is disabled in production. After changing TypeORM entities, generate and apply a migration before deploying:
+
+```bash
+# On your dev machine — generates the migration file
+pnpm exec typeorm migration:generate -d src/lib/db/data-source.ts src/lib/db/migrations/MyMigration
+
+# Apply pending migrations (run inside the container or against the prod DB)
+pnpm exec typeorm migration:run -d src/lib/db/data-source.ts
+```
 
 Tests are colocated with source files (`*.test.ts` / `*.test.tsx`) and use Vitest with jsdom.
 
