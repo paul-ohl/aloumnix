@@ -37,7 +37,6 @@ export async function getAlumniAction(filters: AlumnusFilters = {}) {
         mail: item.mail,
         linkedInProfile: item.linkedInProfile,
         professionalStatus: item.professionalStatus,
-        isPasswordSet: item.isPasswordSet,
         school: { id: item.school?.id } as Alumnus["school"],
         createdAt: item.createdAt.toISOString() as unknown as Date,
         updatedAt: item.updatedAt.toISOString() as unknown as Date,

@@ -110,7 +110,9 @@ export async function sendEmailAction(input: SendEmailInput) {
       let companyName = school.name; // In our model, school is the one offering if it belongs to school
       let location = school.location; // Use school location if not specified in JobOffering
       const description = job.details;
-      let applyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job.id}`; // Default apply URL if not provided
+      // Default: deep-link to the job in the alumni dashboard portal.
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      let applyUrl = `${appUrl}/alumni/dashboard?tab=jobs&highlight=${job.id}`;
 
       // Override with additional_info if present
       if (job.additional_info) {
@@ -128,6 +130,7 @@ export async function sendEmailAction(input: SendEmailInput) {
 
       emailData = {
         type: "job",
+        id: job.id,
         jobTitle,
         companyName,
         location,
@@ -148,6 +151,7 @@ export async function sendEmailAction(input: SendEmailInput) {
 
       emailData = {
         type: "event",
+        id: event.id,
         eventName: event.name,
         location: event.location,
         datetime: event.datetime.toLocaleString("en-US", {

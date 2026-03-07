@@ -16,12 +16,20 @@ import type { SerializedJob } from "./types";
 interface JobListProps {
   showPostButton?: boolean;
   schoolId?: string;
+  highlightId?: string;
 }
 
-export function JobList({ showPostButton = false, schoolId }: JobListProps) {
+export function JobList({
+  showPostButton = false,
+  schoolId,
+  highlightId,
+}: JobListProps) {
   const [jobs, setJobs] = useState<SerializedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Track whether we've already opened the highlight modal once.
+  const highlightOpenedRef = useRef(false);
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -78,14 +86,25 @@ export function JobList({ showPostButton = false, schoolId }: JobListProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleOpenModal = (
-    job: SerializedJob,
-    mode: "view" | "edit" = "view",
-  ) => {
-    setSelectedJob(job);
-    setModalMode(mode);
-    setOpenMenuId(null);
-  };
+  const handleOpenModal = useCallback(
+    (job: SerializedJob, mode: "view" | "edit" = "view") => {
+      setSelectedJob(job);
+      setModalMode(mode);
+      setOpenMenuId(null);
+    },
+    [],
+  );
+
+  // Auto-open modal for the highlighted job on first load.
+  useEffect(() => {
+    if (highlightId && !loading && !highlightOpenedRef.current) {
+      const target = jobs.find((j) => j.id === highlightId);
+      if (target) {
+        highlightOpenedRef.current = true;
+        handleOpenModal(target, "view");
+      }
+    }
+  }, [highlightId, loading, jobs, handleOpenModal]);
 
   const handleCloseModal = () => {
     setSelectedJob(null);

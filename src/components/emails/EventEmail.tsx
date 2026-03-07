@@ -7,6 +7,7 @@ interface EventEmailProps {
   details: string;
   schoolName: string;
   optionalMessage?: string;
+  portalUrl: string;
 }
 
 /**
@@ -20,6 +21,7 @@ export const EventEmail = ({
   details,
   schoolName,
   optionalMessage,
+  portalUrl,
 }: EventEmailProps) => {
   const mainStyle: React.CSSProperties = {
     backgroundColor: "#ffffff",
@@ -79,6 +81,13 @@ export const EventEmail = ({
     paddingTop: "24px",
   };
 
+  const portalLinkStyle: React.CSSProperties = {
+    color: "#18181b", // zinc-900
+    fontSize: "14px",
+    fontWeight: "600",
+    textDecoration: "none",
+  };
+
   return (
     <div style={mainStyle}>
       <div style={containerStyle}>
@@ -108,8 +117,13 @@ export const EventEmail = ({
         </div>
 
         <div style={footerStyle}>
-          <p style={{ margin: "0" }}>Shared by,</p>
-          <p style={{ margin: "0", fontWeight: "600" }}>{schoolName}</p>
+          <p style={{ margin: "0 0 12px" }}>Shared by,</p>
+          <p style={{ margin: "0 0 16px", fontWeight: "600" }}>{schoolName}</p>
+          <p style={{ margin: "0", color: "#71717a", fontSize: "13px" }}>
+            <a href={portalUrl} style={portalLinkStyle}>
+              Log in to the alumni portal →
+            </a>
+          </p>
         </div>
       </div>
     </div>

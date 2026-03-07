@@ -84,12 +84,6 @@ export class Alumnus {
   )
   school!: School;
 
-  @Column({ nullable: true })
-  password?: string;
-
-  @Column({ default: false })
-  isPasswordSet!: boolean;
-
   @CreateDateColumn()
   createdAt!: Date;
 
@@ -152,4 +146,25 @@ export class JobOffering {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+}
+
+@Entity("alumnus_otps")
+export class AlumnusOtp {
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
+
+  @ManyToOne(() => Alumnus, { onDelete: "CASCADE" })
+  alumnus!: Alumnus;
+
+  @Column()
+  code!: string;
+
+  @Column("timestamp")
+  expiresAt!: Date;
+
+  @Column({ default: false })
+  used!: boolean;
+
+  @CreateDateColumn()
+  createdAt!: Date;
 }

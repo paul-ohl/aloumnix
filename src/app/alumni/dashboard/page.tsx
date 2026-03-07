@@ -2,11 +2,30 @@ import { redirect } from "next/navigation";
 import { AuthService } from "@/lib/auth/service";
 import { AlumnusDashboardClient } from "./_components/AlumnusDashboardClient";
 
-export default async function AlumnusDashboardPage() {
+interface AlumnusDashboardPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function AlumnusDashboardPage({
+  searchParams,
+}: AlumnusDashboardPageProps) {
   const session = await AuthService.getSession();
 
   if (!session || session.role !== "alumnus") {
-    redirect("/login/alumni");
+    // Reconstruct the intended destination so the login page can redirect back
+    // after a successful OTP verification.
+    const params = await searchParams;
+    const qs = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined) {
+        qs.set(key, Array.isArray(value) ? value[0] : value);
+      }
+    }
+    const qsStr = qs.toString();
+    const redirectTo = qsStr
+      ? `/alumni/dashboard?${qsStr}`
+      : "/alumni/dashboard";
+    redirect(`/login/alumni?redirect_to=${encodeURIComponent(redirectTo)}`);
   }
 
   return (

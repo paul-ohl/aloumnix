@@ -43,7 +43,8 @@ export const AuthService = {
       userId: user.id,
       role,
       email: role === "school" ? (user as School).name : (user as Alumnus).mail,
-      needsPasswordSet: !user.isPasswordSet,
+      needsPasswordSet:
+        role === "school" ? !(user as School).isPasswordSet : false,
     };
 
     const token = await new SignJWT({ ...payload })

@@ -4,6 +4,7 @@ interface GeneralEmailProps {
   subject: string;
   message: string;
   schoolName: string;
+  portalUrl: string;
 }
 
 /**
@@ -14,6 +15,7 @@ export const GeneralEmail = ({
   subject,
   message,
   schoolName,
+  portalUrl,
 }: GeneralEmailProps) => {
   const mainStyle: React.CSSProperties = {
     backgroundColor: "#ffffff",
@@ -52,14 +54,26 @@ export const GeneralEmail = ({
     paddingTop: "24px",
   };
 
+  const portalLinkStyle: React.CSSProperties = {
+    color: "#18181b", // zinc-900
+    fontSize: "14px",
+    fontWeight: "600",
+    textDecoration: "none",
+  };
+
   return (
     <div style={mainStyle}>
       <div style={containerStyle}>
         <h1 style={h1Style}>{subject}</h1>
         <p style={textStyle}>{message}</p>
         <div style={footerStyle}>
-          <p style={{ margin: "0" }}>Best regards,</p>
-          <p style={{ margin: "0", fontWeight: "600" }}>{schoolName}</p>
+          <p style={{ margin: "0 0 12px" }}>Best regards,</p>
+          <p style={{ margin: "0 0 16px", fontWeight: "600" }}>{schoolName}</p>
+          <p style={{ margin: "0", color: "#71717a", fontSize: "13px" }}>
+            <a href={portalUrl} style={portalLinkStyle}>
+              Log in to the alumni portal →
+            </a>
+          </p>
         </div>
       </div>
     </div>

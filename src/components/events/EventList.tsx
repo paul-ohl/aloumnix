@@ -21,15 +21,20 @@ import type { SerializedEvent } from "./types";
 interface EventListProps {
   showPostButton?: boolean;
   schoolId?: string;
+  highlightId?: string;
 }
 
 export function EventList({
   showPostButton = false,
   schoolId,
+  highlightId,
 }: EventListProps) {
   const [events, setEvents] = useState<SerializedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Track whether we've already opened the highlight modal once.
+  const highlightOpenedRef = useRef(false);
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -87,14 +92,25 @@ export function EventList({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleOpenModal = (
-    event: SerializedEvent,
-    mode: "view" | "edit" = "view",
-  ) => {
-    setSelectedEvent(event);
-    setModalMode(mode);
-    setOpenMenuId(null);
-  };
+  const handleOpenModal = useCallback(
+    (event: SerializedEvent, mode: "view" | "edit" = "view") => {
+      setSelectedEvent(event);
+      setModalMode(mode);
+      setOpenMenuId(null);
+    },
+    [],
+  );
+
+  // Auto-open modal for the highlighted event on first load.
+  useEffect(() => {
+    if (highlightId && !loading && !highlightOpenedRef.current) {
+      const target = events.find((e) => e.id === highlightId);
+      if (target) {
+        highlightOpenedRef.current = true;
+        handleOpenModal(target, "view");
+      }
+    }
+  }, [highlightId, loading, events, handleOpenModal]);
 
   const handleCloseModal = () => {
     setSelectedEvent(null);

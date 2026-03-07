@@ -21,3 +21,19 @@ export function validatePassword(password: string) {
   }
   return null;
 }
+
+export const requestOtpSchema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+});
+
+export type RequestOtpInput = z.infer<typeof requestOtpSchema>;
+
+export const verifyOtpSchema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+  code: z
+    .string()
+    .length(6, "The code must be exactly 6 digits.")
+    .regex(/^\d{6}$/, "The code must contain only digits."),
+});
+
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;

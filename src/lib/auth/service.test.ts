@@ -110,7 +110,6 @@ describe("AuthService", () => {
       const user = {
         id: "alumnus-id",
         mail: "alumnus@example.com",
-        isPasswordSet: false,
       } as Alumnus;
       const role = "alumnus";
 
@@ -122,7 +121,7 @@ describe("AuthService", () => {
         userId: "alumnus-id",
         role: "alumnus",
         email: "alumnus@example.com",
-        needsPasswordSet: true,
+        needsPasswordSet: false,
       });
     });
   });

@@ -20,6 +20,7 @@ function DashboardTabs() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const activeTab = (searchParams.get("tab") as Tab) || "messages";
+  const highlight = searchParams.get("highlight") ?? undefined;
 
   const handleTabChange = (tab: Tab) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -83,13 +84,13 @@ function DashboardTabs() {
 
         {activeTab === "events" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <EventList />
+            <EventList highlightId={highlight} />
           </div>
         )}
 
         {activeTab === "jobs" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <JobList />
+            <JobList highlightId={highlight} />
           </div>
         )}
 

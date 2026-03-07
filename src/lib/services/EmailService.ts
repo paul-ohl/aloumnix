@@ -2,6 +2,7 @@ import { render } from "@react-email/render";
 import { EventEmail } from "@/components/emails/EventEmail";
 import { GeneralEmail } from "@/components/emails/GeneralEmail";
 import { JobEmail } from "@/components/emails/JobEmail";
+import { OtpEmail } from "@/components/emails/OtpEmail";
 import { resend } from "@/lib/email/client";
 
 export type EmailRecipient = {
@@ -18,6 +19,7 @@ export type GeneralEmailData = {
 
 export type JobEmailData = {
   type: "job";
+  id: string;
   jobTitle: string;
   companyName: string;
   location: string;
@@ -29,6 +31,7 @@ export type JobEmailData = {
 
 export type EventEmailData = {
   type: "event";
+  id: string;
   eventName: string;
   location: string;
   datetime: string;
@@ -73,6 +76,18 @@ export const EmailService = {
       const results = [];
       const fromEmail =
         process.env.RESEND_FROM_EMAIL || "Aloumnix <onboarding@resend.dev>";
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+      // Link directly to the destination page; the auth guard will redirect to
+      // /login/alumni?redirect_to=… if the recipient is not already logged in.
+      let portalUrl: string;
+      if (emailData.type === "event") {
+        portalUrl = `${appUrl}/alumni/dashboard?tab=events&highlight=${emailData.id}`;
+      } else if (emailData.type === "job") {
+        portalUrl = `${appUrl}/alumni/dashboard?tab=jobs&highlight=${emailData.id}`;
+      } else {
+        portalUrl = `${appUrl}/alumni/dashboard`;
+      }
 
       for (const batch of batches) {
         const emailBatch = await Promise.all(
@@ -88,6 +103,7 @@ export const EmailService = {
                   subject: emailData.subject,
                   message: emailData.message,
                   schoolName: emailData.schoolName,
+                  portalUrl,
                 }),
               );
 
@@ -107,6 +123,7 @@ export const EmailService = {
                   details: emailData.details,
                   schoolName: emailData.schoolName,
                   optionalMessage: emailData.optionalMessage,
+                  portalUrl,
                 }),
               );
 
@@ -126,6 +143,7 @@ export const EmailService = {
                 applyUrl: emailData.applyUrl,
                 schoolName: emailData.schoolName,
                 optionalMessage: emailData.optionalMessage,
+                portalUrl,
               }),
             );
 
@@ -165,5 +183,42 @@ export const EmailService = {
         error: error instanceof Error ? error.message : "Unknown error",
       };
     }
+  },
+
+  /**
+   * Sends a one-time password code to a single alumnus email address.
+   *
+   * @param recipient Recipient email and display name
+   * @param code      The 6-digit OTP code
+   * @param expiresInMinutes How many minutes the code is valid for (shown in email body)
+   */
+  sendOtpEmail: async (
+    recipient: EmailRecipient,
+    code: string,
+    expiresInMinutes: number,
+  ) => {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error(
+        "RESEND_API_KEY is not configured. Email service is unavailable.",
+      );
+    }
+
+    const fromEmail =
+      process.env.RESEND_FROM_EMAIL || "Aloumnix <onboarding@resend.dev>";
+
+    const html = await render(
+      OtpEmail({
+        code,
+        alumniName: recipient.name,
+        expiresInMinutes,
+      }),
+    );
+
+    return resend.emails.send({
+      from: fromEmail,
+      to: recipient.email,
+      subject: "Your Aloumnix login code",
+      html,
+    });
   },
 };
