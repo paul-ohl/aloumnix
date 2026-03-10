@@ -158,7 +158,7 @@ export function JobEditForm({
                   <button
                     type="button"
                     onClick={() => handleRemoveAdditionalField(index)}
-                    className="p-2 text-zinc-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-0 group-hover:opacity-100"
+                    className="p-2 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all opacity-0 group-hover:opacity-100"
                     title="Remove field"
                   >
                     <svg
@@ -180,7 +180,7 @@ export function JobEditForm({
               );
             })}
             {additionalFields.length === 0 && (
-              <p className="text-sm text-zinc-500 italic">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 italic">
                 No additional fields added.
               </p>
             )}

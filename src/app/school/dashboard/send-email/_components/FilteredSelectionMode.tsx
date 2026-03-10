@@ -139,7 +139,7 @@ export function FilteredSelectionMode({
       <div className="p-8 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl bg-zinc-50/50 dark:bg-zinc-900/50 text-center">
         {isLoading ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:t-zinc-100 rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100 rounded-full animate-spin" />
             <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
               Calculating matching students...
             </p>

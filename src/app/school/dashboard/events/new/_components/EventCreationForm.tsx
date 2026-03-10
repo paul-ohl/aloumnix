@@ -46,10 +46,10 @@ export function EventCreationForm({ schoolId }: EventCreationFormProps) {
   }
 
   const inputClasses =
-    "w-full px-4 py-2 bg-white border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all text-zinc-900 placeholder:text-zinc-400 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50";
+    "w-full px-4 py-2 bg-white border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 focus:border-transparent outline-none transition-all text-zinc-900 placeholder:text-zinc-400 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:placeholder:text-zinc-500";
   const labelClasses =
     "block text-sm font-medium text-zinc-700 mb-1 dark:text-zinc-300";
-  const errorClasses = "text-red-500 text-xs mt-1";
+  const errorClasses = "text-red-500 dark:text-red-400 text-xs mt-1";
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800">

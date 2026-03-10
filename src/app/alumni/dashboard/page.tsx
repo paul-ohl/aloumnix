@@ -29,7 +29,7 @@ export default async function AlumnusDashboardPage({
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-black">
+    <main className="min-h-screen bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-zinc-950">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
           <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight mb-2 dark:text-zinc-50">

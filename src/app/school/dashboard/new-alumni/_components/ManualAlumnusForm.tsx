@@ -83,17 +83,18 @@ export function ManualAlumnusForm({
   }
 
   const inputClasses =
-    "w-full px-4 py-2 bg-white border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all text-zinc-900 placeholder:text-zinc-400";
-  const labelClasses = "block text-sm font-medium text-zinc-700 mb-1";
-  const errorClasses = "text-red-500 text-xs mt-1";
+    "w-full px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50 focus:border-transparent outline-none transition-all text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500";
+  const labelClasses =
+    "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1";
+  const errorClasses = "text-red-500 dark:text-red-400 text-xs mt-1";
 
   return (
-    <section className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-100">
+    <section className="bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
       <header className="mb-6">
-        <h2 className="text-2xl font-bold text-zinc-900">
+        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           Manual Student Entry
         </h2>
-        <p className="text-zinc-500 text-sm">
+        <p className="text-zinc-500 dark:text-zinc-400 text-sm">
           Fill in the details below to add a student to the database.
         </p>
       </header>
@@ -251,13 +252,13 @@ export function ManualAlumnusForm({
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm">
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg text-red-600 dark:text-red-400 text-sm">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="p-4 bg-green-50 border border-green-100 rounded-lg text-green-700 text-sm font-medium flex items-center justify-between">
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30 rounded-lg text-green-700 dark:text-green-400 text-sm font-medium flex items-center justify-between">
             <div className="flex items-center">
               <svg
                 className="w-5 h-5 mr-2"
@@ -275,7 +276,7 @@ export function ManualAlumnusForm({
             </div>
             <Link
               href="/school/dashboard"
-              className="text-green-800 hover:underline font-bold"
+              className="text-green-800 dark:text-green-300 hover:underline font-bold"
             >
               View Dashboard →
             </Link>
@@ -286,12 +287,12 @@ export function ManualAlumnusForm({
           <button
             type="submit"
             disabled={isPending}
-            className="w-full md:w-auto px-8 py-3 bg-zinc-900 text-white font-semibold rounded-xl hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+            className="w-full md:w-auto px-8 py-3 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-semibold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
           >
             {isPending ? (
               <span className="flex items-center justify-center">
                 <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white dark:text-zinc-900"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -304,12 +305,12 @@ export function ManualAlumnusForm({
                     r="10"
                     stroke="currentColor"
                     strokeWidth="4"
-                  ></circle>
+                  />
                   <path
                     className="opacity-75"
                     fill="currentColor"
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                  />
                 </svg>
                 Processing...
               </span>

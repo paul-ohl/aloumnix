@@ -200,7 +200,7 @@ export function ManualSelectionMode({
       <div className="space-y-2">
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:t-zinc-100 mb-4" />
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-100 mb-4" />
             <p className="text-zinc-500">Loading students...</p>
           </div>
         ) : alumni.length === 0 ? (
@@ -234,7 +234,7 @@ export function ManualSelectionMode({
                   {alumnus.fullName}
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                  <span className="text-xs text-zinc-500 flex items-center gap-1">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                     <svg
                       className="w-3.5 h-3.5"
                       fill="none"
@@ -251,7 +251,7 @@ export function ManualSelectionMode({
                     </svg>
                     Class of {alumnus.graduationYear}
                   </span>
-                  <span className="text-xs text-zinc-500 flex items-center gap-1">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                     <svg
                       className="w-3.5 h-3.5"
                       fill="none"

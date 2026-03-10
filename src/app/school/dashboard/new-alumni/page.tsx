@@ -26,12 +26,12 @@ export default async function NewAlumnusPage() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <header>
           <Link
             href="/school/dashboard"
-            className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors mb-6 group"
+            className="inline-flex items-center text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors mb-6 group"
           >
             <svg
               className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform"
@@ -49,10 +49,10 @@ export default async function NewAlumnusPage() {
             </svg>
             Back to Dashboard
           </Link>
-          <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight mb-2">
+          <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight mb-2">
             Add New Students
           </h1>
-          <p className="text-zinc-600 text-lg">
+          <p className="text-zinc-600 dark:text-zinc-400 text-lg">
             Add students to {currentSchool.name}.
           </p>
         </header>

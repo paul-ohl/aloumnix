@@ -195,7 +195,7 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
                   <h3
                     className={`text-xl font-bold ${
                       action.disabled
-                        ? "text-zinc-500"
+                        ? "text-zinc-500 dark:text-zinc-400"
                         : "text-zinc-900 dark:text-zinc-50"
                     }`}
                   >

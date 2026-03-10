@@ -74,7 +74,7 @@ export function EventDetailsModal({
           {mode === "view" ? (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                   Event Name
                 </h3>
                 <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
@@ -83,7 +83,7 @@ export function EventDetailsModal({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                     Organized by
                   </h3>
                   <p className="mt-1 font-bold text-zinc-900 dark:text-zinc-50">
@@ -91,7 +91,7 @@ export function EventDetailsModal({
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                     Date &amp; Time
                   </h3>
                   <p className="mt-1 font-bold text-zinc-900 dark:text-zinc-50">
@@ -110,7 +110,7 @@ export function EventDetailsModal({
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                     Location
                   </h3>
                   <p className="mt-1 font-bold text-zinc-900 dark:text-zinc-50">
@@ -119,7 +119,7 @@ export function EventDetailsModal({
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                <h3 className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                   Details
                 </h3>
                 <div className="mt-3 text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">

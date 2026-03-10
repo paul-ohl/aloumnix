@@ -105,7 +105,7 @@ function ArrowRightIcon() {
 function CheckIcon() {
   return (
     <svg
-      className="w-5 h-5 text-zinc-900 flex-shrink-0"
+      className="w-5 h-5 text-zinc-900 dark:text-zinc-50 flex-shrink-0"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -126,16 +126,16 @@ function CheckIcon() {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans">
       {/* Nav */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-zinc-100">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur border-b border-zinc-100 dark:border-zinc-800">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="text-xl font-extrabold tracking-tight text-zinc-900">
+          <span className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
             Aloumnix
           </span>
           <Link
             href="/login/school"
-            className="text-sm font-semibold text-zinc-900 border border-zinc-300 rounded-lg px-4 py-2 hover:bg-zinc-50 transition-colors duration-150 cursor-pointer"
+            className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 border border-zinc-300 dark:border-zinc-700 rounded-lg px-4 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-150 cursor-pointer"
           >
             School login
           </Link>
@@ -145,23 +145,23 @@ export default function HomePage() {
       <main>
         {/* ── Hero ────────────────────────────────────────────────── */}
         <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-1.5 text-xs font-semibold text-zinc-600 mb-8 tracking-wide uppercase">
-            Built for schools & their graduates
+          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-4 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-8 tracking-wide uppercase">
+            Built for schools &amp; their graduates
           </div>
 
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-zinc-900 tracking-tight leading-tight max-w-3xl mx-auto">
+          <h1 className="text-5xl sm:text-6xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight leading-tight max-w-3xl mx-auto">
             Keep your alumni{" "}
             <span className="relative inline-block">
               <span className="relative z-10">connected</span>
               <span
-                className="absolute inset-x-0 bottom-1 h-3 bg-zinc-200 -z-0 rounded"
+                className="absolute inset-x-0 bottom-1 h-3 bg-zinc-200 dark:bg-zinc-700 -z-0 rounded"
                 aria-hidden="true"
               />
             </span>{" "}
             after graduation.
           </h1>
 
-          <p className="mt-6 text-xl text-zinc-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Aloumnix gives your school a private portal to stay in touch with
             graduates — share job opportunities, announce events, and keep your
             community strong for years to come.
@@ -170,14 +170,14 @@ export default function HomePage() {
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/login/school"
-              className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-8 py-3.5 text-base font-semibold text-white hover:bg-zinc-700 transition-colors duration-200 cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 dark:bg-zinc-50 px-8 py-3.5 text-base font-semibold text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors duration-200 cursor-pointer shadow-sm"
             >
               Get started
               <ArrowRightIcon />
             </Link>
             <a
               href="#how-it-works"
-              className="text-base font-medium text-zinc-600 hover:text-zinc-900 transition-colors duration-150 cursor-pointer"
+              className="text-base font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors duration-150 cursor-pointer"
             >
               See how it works
             </a>
@@ -186,50 +186,54 @@ export default function HomePage() {
 
         {/* ── Dashboard preview ───────────────────────────────────── */}
         <section className="max-w-5xl mx-auto px-6 pb-24">
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-2 shadow-sm">
+          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-2 shadow-sm">
             {/* Fake browser chrome */}
-            <div className="rounded-xl bg-white border border-zinc-100 overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 bg-zinc-50">
-                <span className="w-3 h-3 rounded-full bg-zinc-200" />
-                <span className="w-3 h-3 rounded-full bg-zinc-200" />
-                <span className="w-3 h-3 rounded-full bg-zinc-200" />
-                <span className="mx-auto text-xs text-zinc-400 font-medium tracking-wide">
+            <div className="rounded-xl bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+                <span className="w-3 h-3 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                <span className="w-3 h-3 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                <span className="w-3 h-3 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                <span className="mx-auto text-xs text-zinc-400 dark:text-zinc-500 font-medium tracking-wide">
                   school.aloumnix.com/dashboard
                 </span>
               </div>
               {/* Mock dashboard content */}
               <div className="p-6 grid grid-cols-3 gap-4">
-                <div className="col-span-3 sm:col-span-1 rounded-xl border border-zinc-100 bg-zinc-50 p-4">
-                  <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
+                <div className="col-span-3 sm:col-span-1 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-4">
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1">
                     Total alumni
                   </div>
-                  <div className="text-3xl font-extrabold text-zinc-900">
+                  <div className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">
                     248
                   </div>
-                  <div className="mt-1 text-xs text-zinc-400">
+                  <div className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
                     across 12 graduating classes
                   </div>
                 </div>
-                <div className="col-span-3 sm:col-span-1 rounded-xl border border-zinc-100 bg-zinc-50 p-4">
-                  <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
+                <div className="col-span-3 sm:col-span-1 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-4">
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1">
                     Upcoming events
                   </div>
-                  <div className="text-3xl font-extrabold text-zinc-900">3</div>
-                  <div className="mt-1 text-xs text-zinc-400">
+                  <div className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">
+                    3
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
                     next: Alumni Reunion — Oct 12
                   </div>
                 </div>
-                <div className="col-span-3 sm:col-span-1 rounded-xl border border-zinc-100 bg-zinc-50 p-4">
-                  <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
+                <div className="col-span-3 sm:col-span-1 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-4">
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-1">
                     Open job postings
                   </div>
-                  <div className="text-3xl font-extrabold text-zinc-900">7</div>
-                  <div className="mt-1 text-xs text-zinc-400">
+                  <div className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">
+                    7
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
                     shared with graduates this week
                   </div>
                 </div>
-                <div className="col-span-3 rounded-xl border border-zinc-100 bg-white p-4">
-                  <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">
+                <div className="col-span-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4">
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
                     Recent activity
                   </div>
                   <div className="space-y-3">
@@ -255,14 +259,14 @@ export default function HomePage() {
                         className="flex items-start justify-between gap-4"
                       >
                         <div>
-                          <div className="text-sm font-medium text-zinc-800">
+                          <div className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
                             {item.label}
                           </div>
-                          <div className="text-xs text-zinc-400">
+                          <div className="text-xs text-zinc-400 dark:text-zinc-500">
                             {item.sub}
                           </div>
                         </div>
-                        <span className="text-xs text-zinc-400 whitespace-nowrap">
+                        <span className="text-xs text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
                           {item.time}
                         </span>
                       </div>
@@ -275,7 +279,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Problem / value prop ─────────────────────────────────── */}
-        <section className="bg-zinc-900 text-white py-20 px-6">
+        <section className="bg-zinc-900 dark:bg-zinc-800 text-white py-20 px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-snug">
               Graduation is not the end of the relationship.
@@ -290,13 +294,16 @@ export default function HomePage() {
         </section>
 
         {/* ── Features ────────────────────────────────────────────── */}
-        <section id="how-it-works" className="py-24 px-6">
+        <section
+          id="how-it-works"
+          className="py-24 px-6 bg-white dark:bg-zinc-950"
+        >
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
                 Everything your school needs in one place
               </h2>
-              <p className="mt-4 text-lg text-zinc-500 max-w-xl mx-auto">
+              <p className="mt-4 text-lg text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
                 No complicated setup. No technical knowledge required. Just log
                 in and start connecting.
               </p>
@@ -331,16 +338,16 @@ export default function HomePage() {
               ].map((feature) => (
                 <div
                   key={feature.title}
-                  className="bg-white border border-zinc-200 rounded-2xl p-6 flex flex-col gap-4"
+                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 flex flex-col gap-4"
                 >
-                  <div className="w-11 h-11 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-700 flex-shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-700 dark:text-zinc-300 flex-shrink-0">
                     {feature.icon}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-zinc-900">
+                    <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">
                       {feature.title}
                     </h3>
-                    <p className="mt-1.5 text-sm text-zinc-500 leading-relaxed">
+                    <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
                       {feature.description}
                     </p>
                   </div>
@@ -351,16 +358,16 @@ export default function HomePage() {
         </section>
 
         {/* ── How alumni experience it ─────────────────────────────── */}
-        <section className="bg-zinc-50 py-24 px-6">
+        <section className="bg-zinc-50 dark:bg-zinc-900 py-24 px-6">
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-xs font-semibold text-zinc-600 mb-6 tracking-wide uppercase">
+              <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-6 tracking-wide uppercase">
                 For graduates
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight leading-snug">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight leading-snug">
                 A simple, private portal your graduates will actually use.
               </h2>
-              <p className="mt-4 text-zinc-500 text-lg leading-relaxed">
+              <p className="mt-4 text-zinc-500 dark:text-zinc-400 text-lg leading-relaxed">
                 Alumni log in with just their email — no password to remember.
                 They land on a clean dashboard where they can see upcoming
                 events, browse job listings, and stay up to date with their
@@ -375,22 +382,24 @@ export default function HomePage() {
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <CheckIcon />
-                    <span className="text-sm text-zinc-700">{item}</span>
+                    <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                      {item}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Fake alumni portal preview */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm space-y-4">
               <div className="flex gap-3">
                 {["Messages", "Events", "Jobs", "Account"].map((tab, i) => (
                   <span
                     key={tab}
                     className={`text-sm font-semibold px-3 py-1.5 rounded-lg ${
                       i === 1
-                        ? "bg-zinc-900 text-white"
-                        : "text-zinc-400 bg-zinc-100"
+                        ? "bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900"
+                        : "text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800"
                     }`}
                   >
                     {tab}
@@ -420,20 +429,22 @@ export default function HomePage() {
                 ].map((event) => (
                   <div
                     key={event.name}
-                    className="rounded-xl border border-zinc-100 bg-zinc-50 p-4"
+                    className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-sm font-semibold text-zinc-900">
+                        <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                           {event.name}
                         </div>
-                        <div className="text-xs text-zinc-400 mt-0.5">
+                        <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
                           {event.date}
                         </div>
-                        <div className="text-xs text-zinc-400">{event.loc}</div>
+                        <div className="text-xs text-zinc-400 dark:text-zinc-500">
+                          {event.loc}
+                        </div>
                       </div>
                       {event.badge && (
-                        <span className="text-xs font-semibold bg-zinc-900 text-white rounded-full px-2.5 py-0.5 whitespace-nowrap flex-shrink-0">
+                        <span className="text-xs font-semibold bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-full px-2.5 py-0.5 whitespace-nowrap flex-shrink-0">
                           {event.badge}
                         </span>
                       )}
@@ -446,24 +457,24 @@ export default function HomePage() {
         </section>
 
         {/* ── For school admins ────────────────────────────────────── */}
-        <section className="py-24 px-6">
+        <section className="py-24 px-6 bg-white dark:bg-zinc-950">
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
             {/* Fake admin panel preview */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-4 order-2 lg:order-1">
-              <div className="text-sm font-bold text-zinc-900">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm space-y-4 order-2 lg:order-1">
+              <div className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
                 Send an email to your alumni
               </div>
               <div className="space-y-3">
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 space-y-1">
-                  <div className="text-xs font-semibold text-zinc-500">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-3 space-y-1">
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                     Recipients
                   </div>
-                  <div className="text-sm text-zinc-800 font-medium">
+                  <div className="text-sm text-zinc-800 dark:text-zinc-200 font-medium">
                     All alumni · 248 people
                   </div>
                 </div>
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 space-y-1">
-                  <div className="text-xs font-semibold text-zinc-500">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-3 space-y-1">
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                     Email type
                   </div>
                   <div className="flex gap-2">
@@ -473,8 +484,8 @@ export default function HomePage() {
                           key={t}
                           className={`text-xs font-semibold px-3 py-1.5 rounded-lg cursor-default ${
                             i === 0
-                              ? "bg-zinc-900 text-white"
-                              : "text-zinc-400 bg-zinc-100"
+                              ? "bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900"
+                              : "text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-700"
                           }`}
                         >
                           {t}
@@ -483,28 +494,28 @@ export default function HomePage() {
                     )}
                   </div>
                 </div>
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-                  <div className="text-xs font-semibold text-zinc-500 mb-2">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-3">
+                  <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2">
                     Select event
                   </div>
-                  <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800">
+                  <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200">
                     Annual Alumni Networking Night
                   </div>
                 </div>
-                <div className="rounded-xl bg-zinc-900 text-white text-sm font-semibold text-center py-3 rounded-xl cursor-default">
+                <div className="rounded-xl bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 text-sm font-semibold text-center py-3 cursor-default">
                   Send to 248 alumni
                 </div>
               </div>
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-1.5 text-xs font-semibold text-zinc-600 mb-6 tracking-wide uppercase">
+              <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 px-4 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-6 tracking-wide uppercase">
                 For school staff
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight leading-snug">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight leading-snug">
                 Manage everything in a few clicks.
               </h2>
-              <p className="mt-4 text-zinc-500 text-lg leading-relaxed">
+              <p className="mt-4 text-zinc-500 dark:text-zinc-400 text-lg leading-relaxed">
                 No training required. The school dashboard is designed for
                 administrative staff — not IT teams. Add alumni, publish events,
                 post job listings, and reach everyone by email without ever
@@ -519,7 +530,9 @@ export default function HomePage() {
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <CheckIcon />
-                    <span className="text-sm text-zinc-700">{item}</span>
+                    <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                      {item}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -528,7 +541,7 @@ export default function HomePage() {
         </section>
 
         {/* ── CTA ─────────────────────────────────────────────────── */}
-        <section className="bg-zinc-900 py-24 px-6">
+        <section className="bg-zinc-900 dark:bg-zinc-800 py-24 px-6">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               Ready to stay connected with your graduates?
@@ -549,13 +562,15 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-100 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-400">
-          <span className="font-bold text-zinc-900">Aloumnix</span>
+      <footer className="border-t border-zinc-100 dark:border-zinc-800 py-8 px-6 bg-white dark:bg-zinc-950">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-400 dark:text-zinc-500">
+          <span className="font-bold text-zinc-900 dark:text-zinc-50">
+            Aloumnix
+          </span>
           <span>The alumni portal built for schools.</span>
           <Link
             href="/login/alumni"
-            className="hover:text-zinc-700 transition-colors duration-150 cursor-pointer"
+            className="hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors duration-150 cursor-pointer"
           >
             Alumni login
           </Link>

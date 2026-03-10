@@ -42,7 +42,7 @@ export function SchoolSelect({
         ))}
       </select>
       {error && (
-        <p className="text-xs text-red-500" role="alert">
+        <p className="text-xs text-red-500 dark:text-red-400" role="alert">
           {error}
         </p>
       )}

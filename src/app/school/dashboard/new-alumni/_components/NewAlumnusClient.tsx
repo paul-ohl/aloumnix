@@ -19,15 +19,15 @@ export function NewAlumnusClient({
 
   return (
     <div className="space-y-8">
-      <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
-        <nav className="flex border-b border-zinc-200 bg-zinc-50/50 p-1">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+        <nav className="flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 p-1">
           <button
             type="button"
             onClick={() => setActiveTab("manual")}
             className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${
               activeTab === "manual"
-                ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200"
-                : "text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100/50"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-700"
+                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100/50 dark:hover:bg-zinc-700/50"
             }`}
           >
             Manual Entry
@@ -37,8 +37,8 @@ export function NewAlumnusClient({
             onClick={() => setActiveTab("bulk")}
             className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${
               activeTab === "bulk"
-                ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200"
-                : "text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100/50"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-700"
+                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100/50 dark:hover:bg-zinc-700/50"
             }`}
           >
             Bulk CSV Upload

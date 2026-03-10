@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-// import { ArrowLeft, Loader2, Send } from "lucide-react";
 import { type SendEmailInput, sendEmailAction } from "@/app/actions/email";
 import { getEventsAction } from "@/app/actions/events";
 import { getJobsAction } from "@/app/actions/jobs";

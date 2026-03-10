@@ -91,18 +91,20 @@ export function CsvAlumnusUpload() {
   };
 
   return (
-    <section className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-100">
+    <section className="bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800">
       <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">Bulk CSV Upload</h2>
-          <p className="text-zinc-500 text-sm">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+            Bulk CSV Upload
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm">
             Upload a CSV file to add multiple students at once.
           </p>
         </div>
         <button
           onClick={downloadTemplate}
           type="button"
-          className="inline-flex items-center text-sm font-semibold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 px-4 py-2 rounded-lg transition-colors"
+          className="inline-flex items-center text-sm font-semibold text-zinc-900 dark:text-zinc-50 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-4 py-2 rounded-lg transition-colors"
         >
           <svg
             className="w-4 h-4 mr-2"
@@ -123,7 +125,7 @@ export function CsvAlumnusUpload() {
       </header>
 
       <div className="space-y-6">
-        <div className="border-2 border-dashed border-zinc-200 rounded-xl p-8 text-center hover:border-zinc-300 transition-colors bg-zinc-50/50">
+        <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-8 text-center hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors bg-zinc-50/50 dark:bg-zinc-800/30">
           <input
             type="file"
             accept=".csv"
@@ -134,7 +136,7 @@ export function CsvAlumnusUpload() {
           <label htmlFor="csv-upload" className="cursor-pointer">
             <div className="flex flex-col items-center">
               <svg
-                className="w-12 h-12 text-zinc-400 mb-4"
+                className="w-12 h-12 text-zinc-400 dark:text-zinc-500 mb-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -147,10 +149,10 @@ export function CsvAlumnusUpload() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <span className="text-zinc-900 font-medium">
+              <span className="text-zinc-900 dark:text-zinc-50 font-medium">
                 Click to upload CSV
               </span>
-              <span className="text-zinc-500 text-xs mt-1">
+              <span className="text-zinc-500 dark:text-zinc-400 text-xs mt-1">
                 or drag and drop your file here
               </span>
             </div>
@@ -158,7 +160,7 @@ export function CsvAlumnusUpload() {
         </div>
 
         {headerError && (
-          <div className="p-4 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm flex items-start">
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg text-red-700 dark:text-red-400 text-sm flex items-start">
             <svg
               className="w-5 h-5 mr-3 mt-0.5"
               fill="currentColor"
@@ -176,7 +178,7 @@ export function CsvAlumnusUpload() {
         )}
 
         {data.length > 0 && !headerError && (
-          <div className="flex items-center justify-between p-4 bg-zinc-900 text-white rounded-xl shadow-lg">
+          <div className="flex items-center justify-between p-4 bg-zinc-900 dark:bg-zinc-800 text-white rounded-xl shadow-lg">
             <div className="flex items-center">
               <svg
                 className="w-5 h-5 mr-3 text-zinc-400"
@@ -208,10 +210,10 @@ export function CsvAlumnusUpload() {
         )}
 
         {uploadResult?.success && (
-          <div className="p-4 bg-green-50 border border-green-100 rounded-xl text-green-800 text-sm flex items-center justify-between shadow-sm">
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30 rounded-xl text-green-800 dark:text-green-400 text-sm flex items-center justify-between shadow-sm">
             <div className="flex items-center">
               <svg
-                className="w-6 h-6 mr-3 text-green-500"
+                className="w-6 h-6 mr-3 text-green-500 dark:text-green-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 aria-hidden="true"
@@ -228,7 +230,7 @@ export function CsvAlumnusUpload() {
             </div>
             <Link
               href="/school/dashboard"
-              className="text-green-900 hover:underline font-bold"
+              className="text-green-900 dark:text-green-300 hover:underline font-bold"
             >
               View Dashboard →
             </Link>
@@ -237,9 +239,9 @@ export function CsvAlumnusUpload() {
 
         {uploadResult?.error && (
           <div className="space-y-4">
-            <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-800 text-sm flex items-start shadow-sm">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl text-red-800 dark:text-red-400 text-sm flex items-start shadow-sm">
               <svg
-                className="w-6 h-6 mr-3 text-red-500 mt-0.5"
+                className="w-6 h-6 mr-3 text-red-500 dark:text-red-400 mt-0.5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 aria-hidden="true"
@@ -257,25 +259,25 @@ export function CsvAlumnusUpload() {
             </div>
 
             {uploadResult.rowErrors && uploadResult.rowErrors.length > 0 && (
-              <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
-                <div className="bg-zinc-50 px-4 py-2 border-b border-zinc-200">
-                  <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+                <div className="bg-zinc-50 dark:bg-zinc-800 px-4 py-2 border-b border-zinc-200 dark:border-zinc-700">
+                  <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                     Row Errors
                   </span>
                 </div>
-                <ul className="divide-y divide-zinc-100 max-h-64 overflow-y-auto">
+                <ul className="divide-y divide-zinc-100 dark:divide-zinc-800 max-h-64 overflow-y-auto">
                   {uploadResult.rowErrors.map((rowErr) => (
                     <li
                       key={`row-err-${rowErr.index}`}
                       className="p-3 text-sm flex items-start"
                     >
-                      <span className="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded mr-3 text-xs">
+                      <span className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold px-2 py-0.5 rounded mr-3 text-xs">
                         Row {rowErr.index}
                       </span>
-                      <div className="text-zinc-600">
+                      <div className="text-zinc-600 dark:text-zinc-400">
                         {Object.entries(rowErr.errors).map(([field, msgs]) => (
                           <div key={field} className="mb-1 last:mb-0">
-                            <span className="font-medium text-zinc-900 capitalize">
+                            <span className="font-medium text-zinc-900 dark:text-zinc-50 capitalize">
                               {field}:
                             </span>{" "}
                             {msgs.join(", ")}
