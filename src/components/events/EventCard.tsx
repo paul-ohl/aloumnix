@@ -31,25 +31,19 @@ export function EventCard({
   const isUpcoming = eventDate > new Date();
 
   return (
-    <div
-      className={`group relative bg-white border rounded-2xl p-6 transition-all cursor-pointer dark:bg-zinc-900 ${
+    <button
+      type="button"
+      onClick={() => onView(event)}
+      className={`group w-full text-left bg-white border rounded-2xl p-6 transition-all cursor-pointer dark:bg-zinc-900 ${
         selected
           ? "border-zinc-900 ring-1 ring-zinc-900 dark:border-zinc-50 dark:ring-zinc-50"
           : "border-zinc-200 hover:border-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-50"
       }`}
     >
-      <button
-        type="button"
-        className="absolute inset-0 w-full h-full rounded-2xl"
-        onClick={() => onView(event)}
-      >
-        <span className="sr-only">View event details</span>
-      </button>
-
-      <div className="relative flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start mb-4">
         <div className="flex items-start gap-4 flex-1">
           {showPostButton && onSelect && (
-            <div className="pt-1.5 pointer-events-auto">
+            <div className="pt-1.5">
               <input
                 type="checkbox"
                 checked={selected}
@@ -57,11 +51,12 @@ export function EventCard({
                   e.stopPropagation();
                   onSelect(event.id, e.target.checked);
                 }}
+                onClick={(e) => e.stopPropagation()}
                 className="w-5 h-5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:checked:bg-zinc-50 dark:checked:border-zinc-50"
               />
             </div>
           )}
-          <div className="flex-1 pointer-events-none">
+          <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
                 {event.name}
@@ -99,7 +94,7 @@ export function EventCard({
 
         {showPostButton && (
           <div
-            className="relative pointer-events-auto"
+            className="relative"
             ref={openMenuId === event.id ? menuRef : null}
           >
             <button
@@ -154,9 +149,9 @@ export function EventCard({
           </div>
         )}
       </div>
-      <p className="relative text-zinc-600 dark:text-zinc-400 line-clamp-2 pointer-events-none">
+      <p className="text-zinc-600 dark:text-zinc-400 line-clamp-2">
         {event.details}
       </p>
-    </div>
+    </button>
   );
 }

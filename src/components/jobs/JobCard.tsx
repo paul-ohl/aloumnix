@@ -28,25 +28,19 @@ export function JobCard({
   onSelect,
 }: JobCardProps) {
   return (
-    <div
-      className={`group relative bg-white border rounded-2xl p-6 transition-all cursor-pointer dark:bg-zinc-900 ${
+    <button
+      type="button"
+      onClick={() => onView(job)}
+      className={`group w-full text-left bg-white border rounded-2xl p-6 transition-all cursor-pointer dark:bg-zinc-900 ${
         selected
           ? "border-zinc-900 ring-1 ring-zinc-900 dark:border-zinc-50 dark:ring-zinc-50"
           : "border-zinc-200 hover:border-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-50"
       }`}
     >
-      <button
-        type="button"
-        className="absolute inset-0 w-full h-full rounded-2xl"
-        onClick={() => onView(job)}
-      >
-        <span className="sr-only">View job details</span>
-      </button>
-
-      <div className="relative flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start mb-4">
         <div className="flex items-start gap-4 flex-1">
           {showPostButton && onSelect && (
-            <div className="pt-1.5 pointer-events-auto">
+            <div className="pt-1.5">
               <input
                 type="checkbox"
                 checked={selected}
@@ -54,11 +48,12 @@ export function JobCard({
                   e.stopPropagation();
                   onSelect(job.id, e.target.checked);
                 }}
+                onClick={(e) => e.stopPropagation()}
                 className="w-5 h-5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:checked:bg-zinc-50 dark:checked:border-zinc-50"
               />
             </div>
           )}
-          <div className="flex-1 pointer-events-none">
+          <div className="flex-1">
             <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
               {job.name}
             </h3>
@@ -76,7 +71,7 @@ export function JobCard({
 
         {showPostButton && (
           <div
-            className="relative pointer-events-auto"
+            className="relative"
             ref={openMenuId === job.id ? menuRef : null}
           >
             <button
@@ -131,9 +126,9 @@ export function JobCard({
           </div>
         )}
       </div>
-      <p className="relative text-zinc-600 dark:text-zinc-400 line-clamp-2 pointer-events-none">
+      <p className="text-zinc-600 dark:text-zinc-400 line-clamp-2">
         {job.details}
       </p>
-    </div>
+    </button>
   );
 }
