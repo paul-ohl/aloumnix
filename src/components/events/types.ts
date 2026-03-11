@@ -5,6 +5,8 @@ export interface SerializedEvent {
   datetime: string;
   details: string;
   createdAt: string;
+  participantCount: number;
+  isParticipating: boolean;
   school: {
     id: string;
     name: string;

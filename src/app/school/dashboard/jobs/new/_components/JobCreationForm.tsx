@@ -43,7 +43,7 @@ export function JobCreationForm({ schoolId }: JobCreationFormProps) {
     setFieldErrors({});
 
     const additionalInfo: Record<string, string> = {};
-    const reservedKeys = ["name", "description", "schoolId"];
+    const reservedKeys = ["name", "description", "schoolId", "type"];
 
     for (const field of additionalFields) {
       const key = field.key.trim();
@@ -67,6 +67,8 @@ export function JobCreationForm({ schoolId }: JobCreationFormProps) {
     const data: JobCreationInput = {
       ...additionalInfo,
       name: formData.get("name") as string,
+      type: formData.get("type") as string,
+      contactEmail: formData.get("contactEmail") as string,
       description: formData.get("description") as string,
       schoolId: schoolId,
     };
@@ -92,6 +94,8 @@ export function JobCreationForm({ schoolId }: JobCreationFormProps) {
     "block text-sm font-medium text-zinc-700 mb-1 dark:text-zinc-300";
   const errorClasses = "text-red-500 dark:text-red-400 text-xs mt-1";
 
+  const jobTypes = ["CDI", "CDD", "Internship", "Freelance", "Other"];
+
   return (
     <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800">
       <header className="mb-6">
@@ -105,22 +109,60 @@ export function JobCreationForm({ schoolId }: JobCreationFormProps) {
 
       <form onSubmit={onFormSubmit} className="space-y-6">
         <div className="space-y-4">
-          {/* Job Name */}
-          <div className="space-y-1">
-            <label htmlFor="name" className={labelClasses}>
-              Job Title *
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              placeholder="e.g. Senior Frontend Engineer"
-              className={inputClasses}
-            />
-            {fieldErrors.name && (
-              <p className={errorClasses}>{fieldErrors.name[0]}</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Job Name */}
+            <div className="space-y-1">
+              <label htmlFor="name" className={labelClasses}>
+                Job Title *
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                placeholder="e.g. Senior Frontend Engineer"
+                className={inputClasses}
+              />
+              {fieldErrors.name && (
+                <p className={errorClasses}>{fieldErrors.name[0]}</p>
+              )}
+            </div>
+
+            {/* Job Type */}
+            <div className="space-y-1">
+              <label htmlFor="type" className={labelClasses}>
+                Job Type *
+              </label>
+              <select id="type" name="type" required className={inputClasses}>
+                <option value="">Select a type...</option>
+                {jobTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors.type && (
+                <p className={errorClasses}>{fieldErrors.type[0]}</p>
+              )}
+            </div>
+
+            {/* Contact Email */}
+            <div className="space-y-1">
+              <label htmlFor="contactEmail" className={labelClasses}>
+                Contact Email *
+              </label>
+              <input
+                type="email"
+                id="contactEmail"
+                name="contactEmail"
+                required
+                placeholder="e.g. hr@company.com"
+                className={inputClasses}
+              />
+              {fieldErrors.contactEmail && (
+                <p className={errorClasses}>{fieldErrors.contactEmail[0]}</p>
+              )}
+            </div>
           </div>
 
           {/* Description */}

@@ -2,7 +2,13 @@ import "reflect-metadata";
 import type { DataSource } from "typeorm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getDataSource } from "../db/data-source";
-import { createAlumni, createAlumnus, getAlumni } from "./AlumnusService";
+import {
+  createAlumni,
+  createAlumnus,
+  deleteAlumnus,
+  getAlumni,
+  updateAlumnus,
+} from "./AlumnusService";
 
 vi.mock("../db/entities", () => ({
   Alumnus: class {},
@@ -18,8 +24,12 @@ vi.mock("../db/data-source", () => ({
 describe("AlumnusService", () => {
   const mockRepository = {
     findAndCount: vi.fn(),
+    findOne: vi.fn(),
+    findOneBy: vi.fn(),
     create: vi.fn((data) => data),
     save: vi.fn((data) => Promise.resolve(data)),
+    merge: vi.fn((target, data) => Object.assign(target, data)),
+    delete: vi.fn(),
   };
 
   const mockDataSource = {
@@ -68,6 +78,48 @@ describe("AlumnusService", () => {
       expect(mockRepository.create).toHaveBeenCalledWith(data);
       expect(mockRepository.save).toHaveBeenCalled();
       expect(result).toEqual(data);
+    });
+  });
+
+  describe("updateAlumnus", () => {
+    it("updates and saves an existing alumnus", async () => {
+      const id = "uuid";
+      const existing = { id, fullName: "Old Name" };
+      const updateData = { fullName: "New Name" };
+
+      mockRepository.findOne.mockResolvedValue(existing);
+
+      const result = await updateAlumnus(id, updateData);
+
+      expect(mockRepository.findOne).toHaveBeenCalled();
+      expect(mockRepository.merge).toHaveBeenCalledWith(existing, updateData);
+      expect(mockRepository.save).toHaveBeenCalled();
+      expect(result?.fullName).toBe("New Name");
+    });
+
+    it("returns null if alumnus not found", async () => {
+      mockRepository.findOne.mockResolvedValue(null);
+      const result = await updateAlumnus("uuid", { fullName: "New Name" });
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("deleteAlumnus", () => {
+    it("deletes an existing alumnus", async () => {
+      const id = "uuid";
+      mockRepository.findOneBy.mockResolvedValue({ id });
+      mockRepository.delete.mockResolvedValue({ affected: 1 });
+
+      const result = await deleteAlumnus(id);
+
+      expect(mockRepository.delete).toHaveBeenCalledWith(id);
+      expect(result).toBe(true);
+    });
+
+    it("returns false if alumnus not found", async () => {
+      mockRepository.findOneBy.mockResolvedValue(null);
+      const result = await deleteAlumnus("uuid");
+      expect(result).toBe(false);
     });
   });
 });

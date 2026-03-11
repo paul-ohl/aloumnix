@@ -7,8 +7,12 @@ import {
   type AlumnusFilters,
   createAlumni,
   createAlumnus,
+  deleteAlumnus,
   getAlumni,
+  getAlumnusById,
+  getUniqueGraduationYears,
   getUniqueSchoolSectors,
+  updateAlumnus,
 } from "@/lib/services/AlumnusService";
 import type { AlumnusInput } from "@/lib/validation/alumni";
 import { alumnusSchema } from "@/lib/validation/alumni";
@@ -48,6 +52,58 @@ export async function getAlumniAction(filters: AlumnusFilters = {}) {
   }
 }
 
+export async function getOwnProfileAction() {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "alumnus") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const alumnus = await getAlumnusById(session.userId);
+    if (!alumnus) return { error: "Profile not found" };
+
+    return {
+      success: true,
+      profile: {
+        id: alumnus.id,
+        fullName: alumnus.fullName,
+        graduationYear: alumnus.graduationYear,
+        class: alumnus.class,
+        schoolSector: alumnus.schoolSector,
+        mail: alumnus.mail,
+        linkedInProfile: alumnus.linkedInProfile,
+        professionalStatus: alumnus.professionalStatus,
+        schoolName: alumnus.school?.name,
+      },
+    };
+  } catch (err) {
+    console.error("Error fetching own profile:", err);
+    return { error: "Failed to fetch profile" };
+  }
+}
+
+export async function updateOwnProfileAction(data: {
+  mail: string;
+  linkedInProfile?: string;
+  professionalStatus?: string;
+}) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "alumnus") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const result = await updateAlumnus(session.userId, data);
+    if (!result) return { error: "Profile not found" };
+
+    revalidatePath("/alumni/dashboard");
+    return { success: true };
+  } catch (err) {
+    console.error("Error updating own profile:", err);
+    return { error: "Failed to update profile" };
+  }
+}
+
 export async function getUniqueSchoolSectorsAction() {
   const session = await AuthService.getSession();
   if (!session || session.role !== "school") {
@@ -60,6 +116,21 @@ export async function getUniqueSchoolSectorsAction() {
   } catch (err) {
     console.error("Error fetching school sectors:", err);
     return { error: "Failed to fetch sectors" };
+  }
+}
+
+export async function getUniqueGraduationYearsAction() {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const years = await getUniqueGraduationYears(session.userId);
+    return { years };
+  } catch (err) {
+    console.error("Error fetching graduation years:", err);
+    return { error: "Failed to fetch years" };
   }
 }
 
@@ -130,5 +201,69 @@ export async function bulkCreateAlumniAction(data: AlumnusInput[]) {
       error:
         "Failed to process bulk upload. Please check your data and try again.",
     };
+  }
+}
+
+export async function updateAlumnusAction(id: string, data: AlumnusInput) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  const validated = alumnusSchema.safeParse(data);
+  if (!validated.success) {
+    return {
+      error: "Validation failed",
+      fieldErrors: validated.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const { schoolId: _unused, ...rest } = validated.data;
+    const result = await updateAlumnus(id, rest, session.userId);
+    if (!result) return { error: "Student not found" };
+
+    revalidatePath("/school/dashboard");
+    return { success: true };
+  } catch (err) {
+    console.error("Error updating alumnus:", err);
+    return { error: "Failed to update student" };
+  }
+}
+
+export async function deleteAlumnusAction(id: string) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "school") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const success = await deleteAlumnus(id, session.userId);
+    if (!success) return { error: "Student not found" };
+
+    revalidatePath("/school/dashboard");
+    return { success: true };
+  } catch (err) {
+    console.error("Error deleting alumnus:", err);
+    return { error: "Failed to delete student" };
+  }
+}
+
+export async function deleteOwnAccountAction() {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "alumnus") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const success = await deleteAlumnus(session.userId);
+    if (!success) return { error: "Account not found" };
+
+    await AuthService.logout();
+    revalidatePath("/");
+    return { success: true };
+  } catch (err) {
+    console.error("Error deleting own account:", err);
+    return { error: "Failed to delete account. Please try again." };
   }
 }

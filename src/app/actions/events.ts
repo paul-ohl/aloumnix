@@ -11,6 +11,8 @@ import {
   getEventById,
   getEvents,
   getEventsByIds,
+  joinEvent,
+  leaveEvent,
   updateEvent,
 } from "@/lib/services/EventService";
 import {
@@ -24,14 +26,23 @@ export async function getEventsAction(filters: EventFilters = {}) {
     return { error: "Unauthorized" };
   }
 
+  const currentAlumnusId =
+    session.role === "alumnus" ? session.userId : undefined;
+
   try {
-    const result = await getEvents(filters);
+    const result = await getEvents({
+      ...filters,
+      currentAlumnusId,
+    });
+
     const serializedItems = result.items.map((item) => ({
       id: item.id,
       name: item.name,
       location: item.location,
       datetime: item.datetime.toISOString(),
       details: item.details,
+      participantCount: (item as any).participantCount || 0,
+      isParticipating: (item as any).isParticipating || false,
       school: item.school
         ? {
             id: item.school.id,
@@ -54,6 +65,40 @@ export async function getEventsAction(filters: EventFilters = {}) {
   } catch (error) {
     console.error("Failed to fetch events:", error);
     return { error: "Failed to fetch events" };
+  }
+}
+
+export async function joinEventAction(eventId: string) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "alumnus") {
+    return { error: "Only alumni can join events" };
+  }
+
+  try {
+    await joinEvent(eventId, session.userId);
+    revalidatePath("/school/dashboard");
+    revalidatePath("/alumni/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to join event:", error);
+    return { error: "Failed to join event" };
+  }
+}
+
+export async function leaveEventAction(eventId: string) {
+  const session = await AuthService.getSession();
+  if (!session || session.role !== "alumnus") {
+    return { error: "Only alumni can leave events" };
+  }
+
+  try {
+    await leaveEvent(eventId, session.userId);
+    revalidatePath("/school/dashboard");
+    revalidatePath("/alumni/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to leave event:", error);
+    return { error: "Failed to leave event" };
   }
 }
 

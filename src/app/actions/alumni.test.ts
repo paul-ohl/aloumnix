@@ -3,11 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthService, type SessionPayload } from "@/lib/auth/service";
 import type { Alumnus } from "@/lib/db/entities";
 import * as AlumnusService from "@/lib/services/AlumnusService";
-import { bulkCreateAlumniAction, createAlumnusAction } from "./alumni";
+import {
+  bulkCreateAlumniAction,
+  createAlumnusAction,
+  deleteAlumnusAction,
+  updateAlumnusAction,
+} from "./alumni";
 
 vi.mock("@/lib/services/AlumnusService", () => ({
   createAlumnus: vi.fn(),
   createAlumni: vi.fn(),
+  updateAlumnus: vi.fn(),
+  deleteAlumnus: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -126,6 +133,53 @@ describe("Alumni Server Actions", () => {
       const result = await bulkCreateAlumniAction([validAlumnus]);
 
       expect(result.error).toContain("Failed to process bulk upload");
+    });
+  });
+
+  describe("updateAlumnusAction", () => {
+    it("successfully updates an alumnus", async () => {
+      vi.mocked(AlumnusService.updateAlumnus).mockResolvedValue({} as Alumnus);
+
+      const result = await updateAlumnusAction("uuid", validAlumnus);
+
+      expect(result).toEqual({ success: true });
+      expect(AlumnusService.updateAlumnus).toHaveBeenCalledWith(
+        "uuid",
+        expect.anything(),
+        "school-1",
+      );
+      expect(revalidatePath).toHaveBeenCalledWith("/school/dashboard");
+    });
+
+    it("returns error if alumnus not found", async () => {
+      vi.mocked(AlumnusService.updateAlumnus).mockResolvedValue(null);
+
+      const result = await updateAlumnusAction("uuid", validAlumnus);
+
+      expect(result.error).toBe("Student not found");
+    });
+  });
+
+  describe("deleteAlumnusAction", () => {
+    it("successfully deletes an alumnus", async () => {
+      vi.mocked(AlumnusService.deleteAlumnus).mockResolvedValue(true);
+
+      const result = await deleteAlumnusAction("uuid");
+
+      expect(result).toEqual({ success: true });
+      expect(AlumnusService.deleteAlumnus).toHaveBeenCalledWith(
+        "uuid",
+        "school-1",
+      );
+      expect(revalidatePath).toHaveBeenCalledWith("/school/dashboard");
+    });
+
+    it("returns error if alumnus not found", async () => {
+      vi.mocked(AlumnusService.deleteAlumnus).mockResolvedValue(false);
+
+      const result = await deleteAlumnusAction("uuid");
+
+      expect(result.error).toBe("Student not found");
     });
   });
 });

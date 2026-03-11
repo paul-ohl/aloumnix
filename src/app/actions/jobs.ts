@@ -10,6 +10,8 @@ import {
   getJobById,
   getJobs,
   getJobsByIds,
+  getSchoolsWithJobs,
+  getUniqueJobTypes,
   type JobFilters,
   updateJob,
 } from "@/lib/services/JobService";
@@ -31,6 +33,8 @@ export async function getJobsAction(filters: JobFilters = {}) {
     const serializedItems = result.items.map((item) => ({
       id: item.id,
       name: item.name,
+      type: item.type,
+      contactEmail: item.contactEmail,
       details: item.details,
       additional_info: item.additional_info,
       school: item.school
@@ -58,6 +62,39 @@ export async function getJobsAction(filters: JobFilters = {}) {
   }
 }
 
+export async function getUniqueJobTypesAction() {
+  const session = await AuthService.getSession();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const types = await getUniqueJobTypes();
+    return { success: true, types };
+  } catch (error) {
+    console.error("Failed to fetch job types:", error);
+    return { error: "Failed to fetch job types" };
+  }
+}
+
+export async function getSchoolsWithJobsAction() {
+  const session = await AuthService.getSession();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const schools = await getSchoolsWithJobs();
+    return {
+      success: true,
+      schools: schools.map((s) => ({ id: s.id, name: s.name })),
+    };
+  } catch (error) {
+    console.error("Failed to fetch schools with jobs:", error);
+    return { error: "Failed to fetch schools" };
+  }
+}
+
 export async function seedJobsAction() {
   const session = await AuthService.getSession();
   if (!session || session.role !== "school") {
@@ -65,11 +102,14 @@ export async function seedJobsAction() {
   }
 
   const schoolId = session.userId;
+  const jobTypes = ["CDI", "CDD", "Internship", "Freelance"];
 
   try {
     for (let i = 1; i <= 25; i++) {
       await createJob({
         name: `Test Job Opening #${i}`,
+        type: jobTypes[i % jobTypes.length],
+        contactEmail: "contact@example.com",
         details: `This is a detailed description for test job opening number ${i}. It was generated automatically to test pagination functionality.`,
         additional_info: {
           salary: `${Math.floor(Math.random() * 50 + 50)}k - ${Math.floor(Math.random() * 50 + 100)}k`,
@@ -104,7 +144,8 @@ export async function updateJobAction(id: string, data: JobCreationInput) {
     };
   }
 
-  const { name, description, schoolId, ...rest } = validatedFields.data;
+  const { name, type, contactEmail, description, schoolId, ...rest } =
+    validatedFields.data;
 
   if (schoolId !== session.userId) {
     return { error: "Unauthorized" };
@@ -113,6 +154,8 @@ export async function updateJobAction(id: string, data: JobCreationInput) {
   try {
     await updateJob(id, {
       name,
+      type,
+      contactEmail,
       details: description,
       additional_info: rest,
     });
@@ -141,7 +184,8 @@ export async function createJobAction(data: JobCreationInput) {
     };
   }
 
-  const { name, description, schoolId, ...rest } = validatedFields.data;
+  const { name, type, contactEmail, description, schoolId, ...rest } =
+    validatedFields.data;
 
   if (schoolId !== session.userId) {
     return { error: "Unauthorized" };
@@ -150,6 +194,8 @@ export async function createJobAction(data: JobCreationInput) {
   try {
     await createJob({
       name,
+      type,
+      contactEmail,
       details: description,
       additional_info: rest,
       school: { id: schoolId } as School,

@@ -71,13 +71,25 @@ export function JobDetailsModal({
         <div className="p-8 max-h-[70vh] overflow-y-auto">
           {mode === "view" ? (
             <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
-                  Title
-                </h3>
-                <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                  {job.name}
-                </p>
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                    Title
+                  </h3>
+                  <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                    {job.name}
+                  </p>
+                </div>
+                {job.type && (
+                  <div className="shrink-0">
+                    <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2">
+                      Type
+                    </h3>
+                    <span className="inline-flex px-4 py-1.5 rounded-full text-sm font-bold bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900 shadow-sm">
+                      {job.type}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-6">
                 <div>
@@ -88,6 +100,21 @@ export function JobDetailsModal({
                     {job.school?.name}
                   </p>
                 </div>
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
+                    Contact Email
+                  </h3>
+                  <p className="mt-1 font-bold text-zinc-900 dark:text-zinc-50">
+                    {job.contactEmail ? (
+                      <a href={`mailto:${job.contactEmail}`} className="hover:underline text-blue-600 dark:text-blue-400">
+                        {job.contactEmail}
+                      </a>
+                    ) : (
+                      <span className="text-zinc-400 italic">No contact email provided</span>
+                    )}
+                  </p>
+                </div>
+
                 <div>
                   <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider">
                     Date
