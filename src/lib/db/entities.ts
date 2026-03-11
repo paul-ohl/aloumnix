@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -84,6 +86,12 @@ export class Alumnus {
   )
   school!: School;
 
+  @ManyToMany(
+    () => Event,
+    (event) => event.participants,
+  )
+  events!: Event[];
+
   @CreateDateColumn()
   createdAt!: Date;
 
@@ -114,6 +122,17 @@ export class Event {
   )
   school!: School;
 
+  @ManyToMany(
+    () => Alumnus,
+    (alumnus) => alumnus.events,
+  )
+  @JoinTable({
+    name: "event_participants",
+    joinColumn: { name: "eventId", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "alumnusId", referencedColumnName: "id" },
+  })
+  participants!: Alumnus[];
+
   @CreateDateColumn()
   createdAt!: Date;
 
@@ -128,6 +147,12 @@ export class JobOffering {
 
   @Column()
   name!: string;
+
+  @Column({ nullable: true })
+  type?: string;
+
+  @Column({ nullable: true })
+  contactEmail?: string;
 
   @Column("text")
   details!: string;

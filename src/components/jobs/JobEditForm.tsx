@@ -52,11 +52,19 @@ export function JobEditForm({
     const formData = new FormData(e.currentTarget);
     const data: JobCreationInput = {
       name: formData.get("name") as string,
+      type: formData.get("type") as string,
+      contactEmail: formData.get("contactEmail") as string,
       description: formData.get("description") as string,
       schoolId: job.school?.id || "",
     };
 
-    const reservedKeys = ["name", "description", "schoolId"];
+    const reservedKeys = [
+      "name",
+      "description",
+      "schoolId",
+      "type",
+      "contactEmail",
+    ];
     for (const field of additionalFields) {
       const key = field.key.trim();
       if (key && !reservedKeys.includes(key.toLowerCase())) {
@@ -67,6 +75,8 @@ export function JobEditForm({
     await onSubmit(data);
   };
 
+  const jobTypes = ["CDI", "CDD", "Internship", "Freelance", "Other"];
+
   return (
     <div className="space-y-6">
       <form id="edit-job-form" onSubmit={handleSubmit} className="space-y-6">
@@ -75,21 +85,61 @@ export function JobEditForm({
             {updateError}
           </div>
         )}
-        <div className="space-y-2">
-          <label
-            htmlFor="name"
-            className="block text-sm font-bold text-zinc-700 dark:text-zinc-300"
-          >
-            Job Title
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            defaultValue={job.name}
-            required
-            className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:focus:ring-zinc-50"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label
+              htmlFor="name"
+              className="block text-sm font-bold text-zinc-700 dark:text-zinc-300"
+            >
+              Job Title
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              defaultValue={job.name}
+              required
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:focus:ring-zinc-50"
+            />
+          </div>
+          <div className="space-y-2">
+            <label
+              htmlFor="type"
+              className="block text-sm font-bold text-zinc-700 dark:text-zinc-300"
+            >
+              Job Type
+            </label>
+            <select
+              id="type"
+              name="type"
+              defaultValue={job.type}
+              required
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:focus:ring-zinc-50"
+            >
+              <option value="">Select a type...</option>
+              {jobTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <label
+              htmlFor="contactEmail"
+              className="block text-sm font-bold text-zinc-700 dark:text-zinc-300"
+            >
+              Contact Email
+            </label>
+            <input
+              type="email"
+              id="contactEmail"
+              name="contactEmail"
+              defaultValue={job.contactEmail}
+              required
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all outline-none dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-50 dark:focus:ring-zinc-50"
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <label

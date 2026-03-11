@@ -5,6 +5,8 @@ import {
   deleteJobAction,
   deleteJobsAction,
   getJobsAction,
+  getSchoolsWithJobsAction,
+  getUniqueJobTypesAction,
   updateJobAction,
 } from "@/app/actions/jobs";
 import type { JobCreationInput } from "@/lib/validation/jobs";
@@ -21,12 +23,23 @@ interface JobListProps {
 
 export function JobList({
   showPostButton = false,
-  schoolId,
+  schoolId: initialSchoolId,
   highlightId,
 }: JobListProps) {
   const [jobs, setJobs] = useState<SerializedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Filter State
+  const [filterName, setFilterName] = useState("");
+  const [filterSchoolId, setFilterSchoolId] = useState(initialSchoolId || "");
+  const [filterType, setFilterType] = useState("");
+
+  // Metadata for filters
+  const [availableSchools, setAvailableSchools] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
 
   // Track whether we've already opened the highlight modal once.
   const highlightOpenedRef = useRef(false);
@@ -51,9 +64,30 @@ export function JobList({
   // Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  const fetchMetadata = useCallback(async () => {
+    const [schoolsRes, typesRes] = await Promise.all([
+      getSchoolsWithJobsAction(),
+      getUniqueJobTypesAction(),
+    ]);
+
+    if (schoolsRes.success && schoolsRes.schools) {
+      setAvailableSchools(schoolsRes.schools);
+    }
+    if (typesRes.success && typesRes.types) {
+      setAvailableTypes(typesRes.types);
+    }
+  }, []);
+
   const fetchJobs = useCallback(async () => {
     setLoading(true);
-    const result = await getJobsAction({ schoolId, page, limit: 10 });
+    const result = await getJobsAction({
+      schoolId: filterSchoolId || undefined,
+      name: filterName || undefined,
+      type: filterType || undefined,
+      page,
+      limit: 10,
+    });
+
     if ("error" in result && result.error) {
       setError(result.error);
     } else if ("items" in result && result.items) {
@@ -70,11 +104,21 @@ export function JobList({
       }
     }
     setLoading(false);
-  }, [schoolId, page]);
+  }, [filterSchoolId, filterName, filterType, page]);
+
+  useEffect(() => {
+    fetchMetadata();
+  }, [fetchMetadata]);
 
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  // Reset page when filters change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only reset page when filters change, not when page changes
+  useEffect(() => {
+    setPage(1);
+  }, [filterSchoolId, filterName, filterType]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -185,7 +229,13 @@ export function JobList({
     setDeleteId(null);
   };
 
-  if (loading && jobs.length === 0) {
+  if (
+    loading &&
+    jobs.length === 0 &&
+    !filterName &&
+    !filterSchoolId &&
+    !filterType
+  ) {
     return <JobLoading />;
   }
 
@@ -198,35 +248,127 @@ export function JobList({
   const someOnPageSelected =
     jobs.length > 0 && jobs.some((job) => selectedIds.has(job.id));
 
+  const selectClasses =
+    "px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-medium text-zinc-700 outline-none focus:ring-2 focus:ring-zinc-900 transition-all dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:focus:ring-zinc-50";
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          {showPostButton && jobs.length > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
-              <input
-                type="checkbox"
-                checked={allOnPageSelected}
-                ref={(el) => {
-                  if (el) {
-                    el.indeterminate = someOnPageSelected && !allOnPageSelected;
-                  }
-                }}
-                onChange={(e) => handleSelectAllOnPage(e.target.checked)}
-                className="w-5 h-5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:checked:bg-zinc-50 dark:checked:border-zinc-50"
-              />
-              <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Select Page
-              </span>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+            Job Openings
+          </h2>
+          {showPostButton && <PostJobButton />}
+        </div>
+
+        {/* Filters */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          <div className="space-y-1">
+            <label
+              htmlFor="search-filter"
+              className="text-xs font-bold text-zinc-500 uppercase ml-1"
+            >
+              Search
+            </label>
+            <input
+              id="search-filter"
+              type="text"
+              placeholder="Filter by title..."
+              value={filterName}
+              onChange={(e) => setFilterName(e.target.value)}
+              className="w-full px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-zinc-900 transition-all dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-50 dark:focus:ring-zinc-50"
+            />
+          </div>
+
+          {!initialSchoolId && (
+            <div className="space-y-1">
+              <label
+                htmlFor="school-filter"
+                className="text-xs font-bold text-zinc-500 uppercase ml-1"
+              >
+                School
+              </label>
+              <select
+                id="school-filter"
+                value={filterSchoolId}
+                onChange={(e) => setFilterSchoolId(e.target.value)}
+                className={`w-full ${selectClasses}`}
+              >
+                <option value="">All Schools</option>
+                {availableSchools.map((school) => (
+                  <option key={school.id} value={school.id}>
+                    {school.name}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
-          {selectedIds.size > 0 && (
-            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-              {selectedIds.size} selected
-            </span>
-          )}
+
+          <div className="space-y-1">
+            <label
+              htmlFor="type-filter"
+              className="text-xs font-bold text-zinc-500 uppercase ml-1"
+            >
+              Job Type
+            </label>
+            <select
+              id="type-filter"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className={`w-full ${selectClasses}`}
+            >
+              <option value="">All Types</option>
+              {availableTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={() => {
+                setFilterName("");
+                setFilterSchoolId(initialSchoolId || "");
+                setFilterType("");
+              }}
+              className="w-full px-4 py-2 text-sm font-bold text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
-        {showPostButton && <PostJobButton />}
+
+        <div className="flex justify-between items-center h-10">
+          <div className="flex items-center gap-4">
+            {showPostButton && jobs.length > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <input
+                  type="checkbox"
+                  checked={allOnPageSelected}
+                  ref={(el) => {
+                    if (el) {
+                      el.indeterminate =
+                        someOnPageSelected && !allOnPageSelected;
+                    }
+                  }}
+                  onChange={(e) => handleSelectAllOnPage(e.target.checked)}
+                  className="w-5 h-5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:checked:bg-zinc-50 dark:checked:border-zinc-50"
+                />
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Select Page
+                </span>
+              </div>
+            )}
+            {selectedIds.size > 0 && (
+              <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                {selectedIds.size} selected
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {jobs.length === 0 ? (

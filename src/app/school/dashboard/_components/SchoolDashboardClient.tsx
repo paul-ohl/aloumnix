@@ -7,8 +7,9 @@ import { Suspense } from "react";
 import { logoutAction } from "@/app/actions/auth";
 import { EventList } from "@/components/events/EventList";
 import { JobList } from "@/components/jobs/JobList";
+import { AlumnusManagement } from "./AlumnusManagement";
 
-type Tab = "actions" | "events" | "jobs" | "account";
+type Tab = "actions" | "alumni" | "events" | "jobs" | "account";
 
 interface SchoolDashboardClientProps {
   schoolId: string;
@@ -135,6 +136,7 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "actions", label: "Actions" },
+    { id: "alumni", label: "Alumni" },
     { id: "events", label: "Events" },
     { id: "jobs", label: "Jobs" },
     { id: "account", label: "Account" },
@@ -142,7 +144,7 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
 
   return (
     <div className="space-y-8">
-      <nav className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl max-w-md mx-auto">
+      <nav className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl max-w-lg mx-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -225,6 +227,12 @@ function DashboardTabs({ schoolId }: { schoolId: string }) {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {activeTab === "alumni" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <AlumnusManagement />
           </div>
         )}
 

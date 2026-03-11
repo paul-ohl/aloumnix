@@ -54,9 +54,16 @@ export function JobCard({
             </div>
           )}
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-              {job.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                {job.name}
+              </h3>
+              {job.type && (
+                <span className="text-xs font-bold px-2 py-0.5 bg-zinc-100 text-zinc-900 rounded-full dark:bg-zinc-800 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-700">
+                  {job.type}
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-sm text-zinc-500 dark:text-zinc-400">
                 {job.school?.name}

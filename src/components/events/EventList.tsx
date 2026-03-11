@@ -5,9 +5,12 @@ import {
   deleteEventAction,
   deleteEventsAction,
   getEventsAction,
+  joinEventAction,
+  leaveEventAction,
   updateEventAction,
 } from "@/app/actions/events";
 import type { EventCreationInput } from "@/lib/validation/events";
+import { CalendarView } from "./CalendarView";
 import { EventCard } from "./EventCard";
 import { EventDetailsModal } from "./EventDetailsModal";
 import {
@@ -32,6 +35,7 @@ export function EventList({
   const [events, setEvents] = useState<SerializedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
   // Track whether we've already opened the highlight modal once.
   const highlightOpenedRef = useRef(false);
@@ -60,7 +64,9 @@ export function EventList({
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
-    const result = await getEventsAction({ schoolId, page, limit: 10 });
+    // When in calendar mode, we fetch more events to show them on the calendar
+    const limit = viewMode === "calendar" ? 1000 : 10;
+    const result = await getEventsAction({ schoolId, page, limit });
     if ("error" in result && result.error) {
       setError(result.error);
     } else if ("items" in result && result.items) {
@@ -73,10 +79,16 @@ export function EventList({
       } else {
         setEvents(items);
         setTotalPages(totalPagesResult);
+
+        // Update selected event if it's open to reflect latest participation status/count
+        if (selectedEvent) {
+          const updated = items.find((e) => e.id === selectedEvent.id);
+          if (updated) setSelectedEvent(updated);
+        }
       }
     }
     setLoading(false);
-  }, [schoolId, page]);
+  }, [schoolId, page, viewMode, selectedEvent?.id, selectedEvent]);
 
   useEffect(() => {
     fetchEvents();
@@ -147,6 +159,24 @@ export function EventList({
     setIsPending(false);
   };
 
+  const handleJoinEvent = async (id: string) => {
+    const result = await joinEventAction(id);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      await fetchEvents();
+    }
+  };
+
+  const handleLeaveEvent = async (id: string) => {
+    const result = await leaveEventAction(id);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      await fetchEvents();
+    }
+  };
+
   const handleSelect = (id: string, selected: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -206,37 +236,99 @@ export function EventList({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          {showPostButton && events.length > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
-              <input
-                type="checkbox"
-                checked={allOnPageSelected}
-                ref={(el) => {
-                  if (el) {
-                    el.indeterminate = someOnPageSelected && !allOnPageSelected;
-                  }
-                }}
-                onChange={(e) => handleSelectAllOnPage(e.target.checked)}
-                className="w-5 h-5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:checked:bg-zinc-50 dark:checked:border-zinc-50"
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <button
+            type="button"
+            onClick={() => setViewMode("list")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              viewMode === "list"
+                ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-50"
+                : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+            }`}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>List View</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
               />
-              <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Select Page
-              </span>
-            </div>
-          )}
-          {selectedIds.size > 0 && (
-            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-              {selectedIds.size} selected
-            </span>
-          )}
+            </svg>
+            List
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("calendar")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              viewMode === "calendar"
+                ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-50"
+                : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+            }`}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <title>Calendar View</title>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            Calendar
+          </button>
         </div>
-        {showPostButton && <PostEventButton />}
+
+        <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-4">
+            {showPostButton && events.length > 0 && viewMode === "list" && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <input
+                  type="checkbox"
+                  checked={allOnPageSelected}
+                  ref={(el) => {
+                    if (el) {
+                      // biome-ignore lint/style/noNonNullAssertion: DOM ref
+                      el.indeterminate =
+                        someOnPageSelected && !allOnPageSelected;
+                    }
+                  }}
+                  onChange={(e) => handleSelectAllOnPage(e.target.checked)}
+                  className="w-5 h-5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:checked:bg-zinc-50 dark:checked:border-zinc-50"
+                />
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Select Page
+                </span>
+              </div>
+            )}
+            {selectedIds.size > 0 && (
+              <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                {selectedIds.size} selected
+              </span>
+            )}
+          </div>
+          {showPostButton && <PostEventButton />}
+        </div>
       </div>
 
       {events.length === 0 ? (
         <EventEmpty showPostButton={showPostButton} />
+      ) : viewMode === "calendar" ? (
+        <CalendarView
+          events={events}
+          onView={(e) => handleOpenModal(e, "view")}
+        />
       ) : (
         <>
           <div className="grid gap-4">
@@ -253,6 +345,8 @@ export function EventList({
                   setDeleteId(id);
                   setOpenMenuId(null);
                 }}
+                onJoin={handleJoinEvent}
+                onLeave={handleLeaveEvent}
                 menuRef={menuRef}
                 selected={selectedIds.has(event.id)}
                 onSelect={handleSelect}
@@ -362,6 +456,8 @@ export function EventList({
           showPostButton={showPostButton}
           isUpdating={isPending}
           onUpdate={handleUpdateEvent}
+          onJoin={handleJoinEvent}
+          onLeave={handleLeaveEvent}
           updateError={updateError}
         />
       )}

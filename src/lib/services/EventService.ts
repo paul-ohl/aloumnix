@@ -1,10 +1,4 @@
-import {
-  type FindManyOptions,
-  type FindOptionsWhere,
-  ILike,
-  In,
-  MoreThanOrEqual,
-} from "typeorm";
+import { In } from "typeorm";
 import { getDataSource } from "../db/data-source";
 import { Event } from "../db/entities";
 
@@ -15,34 +9,68 @@ export interface EventFilters {
   fromDate?: Date;
   page?: number;
   limit?: number;
+  currentAlumnusId?: string;
 }
 
 export const getEvents = async (filters: EventFilters = {}) => {
   const dataSource = await getDataSource();
   const repository = dataSource.getRepository(Event);
 
-  const { name, location, schoolId, fromDate, page = 1, limit = 10 } = filters;
+  const {
+    name,
+    location,
+    schoolId,
+    fromDate,
+    page = 1,
+    limit = 10,
+    currentAlumnusId,
+  } = filters;
   const skip = (page - 1) * limit;
 
-  const where: FindOptionsWhere<Event> = {};
+  const query = repository
+    .createQueryBuilder("event")
+    .leftJoinAndSelect("event.school", "school")
+    .loadRelationCountAndMap("event.participantCount", "event.participants")
+    .skip(skip)
+    .take(limit)
+    .orderBy("event.datetime", "ASC");
 
-  if (name) where.name = ILike(`%${name}%`);
-  if (location) where.location = ILike(`%${location}%`);
-  if (schoolId) where.school = { id: schoolId };
-  if (fromDate) where.datetime = MoreThanOrEqual(fromDate);
+  if (name) query.andWhere("event.name ILIKE :name", { name: `%${name}%` });
+  if (location)
+    query.andWhere("event.location ILIKE :location", {
+      location: `%${location}%`,
+    });
+  if (schoolId) query.andWhere("school.id = :schoolId", { schoolId });
+  if (fromDate) query.andWhere("event.datetime >= :fromDate", { fromDate });
 
-  const options: FindManyOptions<Event> = {
-    where,
-    relations: ["school"],
-    take: limit,
-    skip: skip,
-    order: { datetime: "ASC" },
-  };
+  if (currentAlumnusId) {
+    query.leftJoin(
+      "event.participants",
+      "currentParticipant",
+      "currentParticipant.id = :alumnusId",
+      { alumnusId: currentAlumnusId },
+    );
+    query.addSelect("currentParticipant.id", "isParticipating");
+  }
 
-  const [items, total] = await repository.findAndCount(options);
+  const { entities, raw } = await query.getRawAndEntities();
+  const total = await query.getCount();
 
   return {
-    items,
+    items: entities.map((item, index) => {
+      // Find the corresponding raw result to get the isParticipating flag
+      const rawResult = raw[index];
+      const isParticipating = currentAlumnusId
+        ? !!rawResult.isParticipating
+        : false;
+
+      return {
+        ...item,
+        // @ts-expect-error - injected by loadRelationCountAndMap
+        participantCount: item.participantCount || 0,
+        isParticipating,
+      };
+    }),
     total,
     page,
     limit,
@@ -57,10 +85,37 @@ export const createEvent = async (data: Partial<Event>) => {
   return await repository.save(event);
 };
 
-export const getEventById = async (id: string) => {
+export const getEventById = async (id: string, alumnusId?: string) => {
   const dataSource = await getDataSource();
   const repository = dataSource.getRepository(Event);
-  return await repository.findOne({ where: { id }, relations: ["school"] });
+
+  const query = repository
+    .createQueryBuilder("event")
+    .leftJoinAndSelect("event.school", "school")
+    .loadRelationCountAndMap("event.participantCount", "event.participants")
+    .where("event.id = :id", { id });
+
+  const event = await query.getOne();
+  if (!event) return null;
+
+  let isParticipating = false;
+  if (alumnusId) {
+    const count = await dataSource
+      .getRepository(Event)
+      .createQueryBuilder("event")
+      .innerJoin("event.participants", "participant")
+      .where("event.id = :id", { id })
+      .andWhere("participant.id = :alumnusId", { alumnusId })
+      .getCount();
+    isParticipating = count > 0;
+  }
+
+  return {
+    ...event,
+    // @ts-expect-error
+    participantCount: event.participantCount || 0,
+    isParticipating,
+  };
 };
 
 export const updateEvent = async (
@@ -70,7 +125,7 @@ export const updateEvent = async (
   const dataSource = await getDataSource();
   const repository = dataSource.getRepository(Event);
   await repository.update(id, data);
-  return await repository.findOne({ where: { id }, relations: ["school"] });
+  return await getEventById(id);
 };
 
 export const deleteEvent = async (id: string) => {
@@ -92,4 +147,39 @@ export const getEventsByIds = async (ids: string[]) => {
     where: { id: In(ids) },
     relations: ["school"],
   });
+};
+
+export const joinEvent = async (eventId: string, alumnusId: string) => {
+  const dataSource = await getDataSource();
+  await dataSource
+    .createQueryBuilder()
+    .relation(Event, "participants")
+    .of(eventId)
+    .add(alumnusId);
+  return true;
+};
+
+export const leaveEvent = async (eventId: string, alumnusId: string) => {
+  const dataSource = await getDataSource();
+  await dataSource
+    .createQueryBuilder()
+    .relation(Event, "participants")
+    .of(eventId)
+    .remove(alumnusId);
+  return true;
+};
+
+export const isAlumnusParticipating = async (
+  eventId: string,
+  alumnusId: string,
+) => {
+  const dataSource = await getDataSource();
+  const count = await dataSource
+    .getRepository(Event)
+    .createQueryBuilder("event")
+    .innerJoin("event.participants", "participant")
+    .where("event.id = :eventId", { eventId })
+    .andWhere("participant.id = :alumnusId", { alumnusId })
+    .getCount();
+  return count > 0;
 };
